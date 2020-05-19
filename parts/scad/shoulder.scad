@@ -4,7 +4,7 @@ use <stepper.scad>
 
 
 
-module shoulder_wheel(holes=4) {
+module shoulder_wheel() {
   hole_offset = get_hole_distance() / 2;
   
   difference () {
@@ -25,8 +25,8 @@ module shoulder_wheel(holes=4) {
       }
     }
     // arm mounting holes
-    for (i = [0 : holes - 1]) {
-      rotate([0, 0, i * 360/holes]) translate([bearing_val(bearing_type_big)[id]/4 + coupler_diameter/4
+    for (i = [0 : axle_holes - 1]) {
+      rotate([0, 0, i * 360/axle_holes]) translate([bearing_val(bearing_type_big)[id]/4 + coupler_diameter/4
         + object_clearance/2 - pressfit_clearance, 0, -e]) {
           cylinder(h=shoulder_teeth_width + e, d=screw_diameter);
           translate([0, 0, plane_thickness + screw_nut_height + e]) 
@@ -46,17 +46,18 @@ module shoulder_wheel(holes=4) {
       }
     }
     // arm mounting
-    for (i = [0 : holes - 1]) {
-      rotate([180, 0, i * 360/holes]) translate([bearing_val(bearing_type_big)[id]/4 + coupler_diameter/4
-        + object_clearance/2 - pressfit_clearance, 0, -plane_thickness - screw_nut_height]) 
-          rotate([0, 0, 90]) stainless() nut(screw_type);
+    for (i = [0 : axle_holes - 1]) {
+      rotate([180, 0, i * 360/axle_holes]) translate([bearing_val(bearing_type_big)[id]/4 
+        + coupler_diameter/4 + object_clearance/2 - pressfit_clearance, 0, 
+          -plane_thickness - screw_nut_height]) 
+            rotate([0, 0, 90]) stainless() nut(screw_type);
     }
     translate([0, 0, stepper_offset]) stepper();
   }
 }
 
 
-module shoulder_connector(holes=4, height = 15) {
+module shoulder_connector(height = 15) {
   _screw_name = "M5x50";
   
   shoulder_teeth_width = nut_diameter + 2 * wall_thickness;
@@ -78,8 +79,8 @@ module shoulder_connector(holes=4, height = 15) {
       d=thread_diameter + 2 * object_clearance);
     translate([0, length/2, -e]) cylinder(h=height + 2 * e, d=thread_diameter);
     translate([0, -length/2, -e]) cylinder(h=height + 2 * e, d=thread_diameter);
-    for (i = [0 : holes - 1]) {
-      rotate([0, 0, i * 360/holes])
+    for (i = [0 : axle_holes - 1]) {
+      rotate([0, 0, i * 360/axle_holes])
         translate([bearing_val(bearing_type_big)[id]/4 + coupler_diameter/4 + object_clearance/2 
           - pressfit_clearance, 0, -e]) 
             cylinder(h=total_height + bearing_val(bearing_type_big)[h]/2 + 2 * e, d=screw_diameter);
@@ -101,8 +102,8 @@ module shoulder_connector(holes=4, height = 15) {
       translate([0, -length/2, height + nut_height + spacer_thickness]) nut(thread_name);
       
       // screws
-      for (i = [0 : holes - 1]) {
-        rotate([0, 180, i * 360/holes])
+      for (i = [0 : axle_holes - 1]) {
+        rotate([0, 180, i * 360/axle_holes])
           translate([bearing_val(bearing_type_big)[id]/4 + coupler_diameter/4 + object_clearance/2 
             - pressfit_clearance, 0, 0]) screw(_screw_name);
       }
@@ -111,7 +112,7 @@ module shoulder_connector(holes=4, height = 15) {
 }
 
 
-module bearing_holder(holes=8) {
+module bearing_holder() {
   _screw_name = "M5x20";
   _screw_length = 19.3;
   
@@ -124,8 +125,8 @@ module bearing_holder(holes=8) {
       cylinder(h=height - offset + e, d=bearing_val(bearing_type_big)[od] + 2 * pressfit_clearance);
     translate([0, 0, -e]) cylinder(h=offset + 2 * e, d=bearing_val(bearing_type_big)[od]/2 
       + bearing_val(bearing_type_big)[id]/2 + object_clearance);
-    for (i = [0 : holes-1]) {
-      rotate([0, 0, i * 360/holes]) {
+    for (i = [0 : bearing_holes - 1]) {
+      rotate([0, 0, i * 360/bearing_holes]) {
         translate([bearing_val(bearing_type_big)[od]/2 + screw_diameter/2 + wall_thickness, 0, -e]) 
           cylinder(h=height + 2 * e, d=screw_diameter);
         translate([bearing_val(bearing_type_big)[od]/2 + screw_diameter/2 + wall_thickness, 0, 0]) 
@@ -139,8 +140,8 @@ module bearing_holder(holes=8) {
     translate([0, 0, offset])
       bearing(model=bearing_type_big);
     // nuts and bolts
-    for (i = [0 : holes]) stainless() {
-      rotate([0, 0, i * 360/holes]) {
+    for (i = [0 : bearing_holes - 1]) stainless() {
+      rotate([0, 0, i * 360/bearing_holes]) {
         translate([bearing_val(bearing_type_big)[od]/2 + screw_diameter/2 + wall_thickness, 0, 
           _screw_length]) screw(_screw_name);
         translate([bearing_val(bearing_type_big)[od]/2 + screw_diameter/2 + wall_thickness, 0, 
@@ -151,23 +152,7 @@ module bearing_holder(holes=8) {
 }
 
 
-module bearing_clamp_top(holes=4) {
-  difference() {
-    union() {
-      cylinder(h=plane_thickness, d=bearing_val(bearing_type_big)[od]/2 
-        + bearing_val(bearing_type_big)[id]/2 - object_clearance);
-      cylinder(h=plane_thickness + bearing_val(bearing_type_big)[h]/2, d=bearing_val(bearing_type_big)[id]
-        - 2 * pressfit_clearance);
-    }
-    translate([0, 0, -e]) 
-      cylinder(h=plane_thickness + bearing_val(bearing_type_big)[h]/2 + 2 * e, d=coupler_diameter 
-        + 2 * object_clearance);
-    
-  }
-}
-
-
-module bearing_clamp(holes=4) {
+module bearing_clamp() {
   height = plane_thickness + screw_nut_height + object_clearance;
   difference() {
     union() {
@@ -179,8 +164,8 @@ module bearing_clamp(holes=4) {
     translate([0, 0, -e]) 
       cylinder(h=height + bearing_val(bearing_type_big)[h]/2 + 2 * e, d=coupler_diameter 
         + 2 * object_clearance);
-    for (i = [0 : holes - 1]) {
-      rotate([0, 0, i * 360/holes])
+    for (i = [0 : bearing_holes - 1]) {
+      rotate([0, 0, i * 360/bearing_holes])
         translate([bearing_val(bearing_type_big)[id]/4 + coupler_diameter/4 + object_clearance/2 
           - pressfit_clearance, 0, -e]) 
             cylinder(h=height + bearing_val(bearing_type_big)[h]/2 + 2 * e, d=screw_diameter);
@@ -196,13 +181,13 @@ module coupler() {
 
 
 
-module plate(holes=8) {
+module plate() {
   steel() difference() {
     cube([100, 100, plate_thickness], center=true);
     cylinder(h=plate_thickness + 2 * e, d=bearing_val(bearing_type_big)[od]/2 
       + bearing_val(bearing_type_big)[id]/2 + object_clearance, center=true);
-    for (i = [0 : holes-1]) {
-      rotate([0, 0, i * 360/holes]) {
+    for (i = [0 : bearing_holes - 1]) {
+      rotate([0, 0, i * 360/bearing_holes]) {
         translate([bearing_val(bearing_type_big)[od]/2 + screw_diameter/2 + wall_thickness, 0, 0]) 
           cylinder(h=plate_thickness + 2 * e, d=screw_diameter, center=true);
       }

@@ -67,54 +67,51 @@ module foil() {
 
 
 module shoulder_module() {
-  axle_holes = 6;
-  bearing_holes = 10;
-  
   if (assembled) {
     rotate([0, elbow_angle, 0]) {
       translate([-upper_arm_length + shoulder_wheel_radius, 0, 0]) rotate([0, 270, 0]) {
         gears();
         // wheel
-        shoulder_wheel(axle_holes);
+        shoulder_wheel();
         
         // bearing holder
-        translate([0, 0, -object_clearance]) rotate([0, 180, 180]) bearing_holder(holes=bearing_holes);
+        translate([0, 0, -object_clearance]) rotate([0, 180, 180]) bearing_holder();
         
         // bearing_clamp
-        rotate([0, 180, 180]) bearing_clamp(axle_holes);
+        rotate([0, 180, 180]) bearing_clamp();
         
         // connector
         connector_offset = 15 + plane_thickness + screw_nut_height + bearing_val(bearing_type_big)[h] 
           + nut_height + spacer_thickness + plate_thickness + screw_head_height + 2 * object_clearance;
-        translate([0, 0, -connector_offset]) shoulder_connector(axle_holes);
+        translate([0, 0, -connector_offset]) shoulder_connector();
           
         // coupler
         translate([0, 0, stepper_offset - get_axle_length() - coupler_height/2]) coupler();
         
         // plate
         translate([0, 0, -screw_nut_height - object_clearance - plate_thickness/2 
-          - bearing_val(bearing_type_big)[h] - pressfit_clearance - plane_thickness]) plate(bearing_holes);
+          - bearing_val(bearing_type_big)[h] - pressfit_clearance - plane_thickness]) plate();
       }
     }
   }
   else {
     // wheel
-    translate(shoulder_wheel_pos) shoulder_wheel(axle_holes);
+    translate(shoulder_wheel_pos) shoulder_wheel();
     
     // bearing holder
-    translate(bearing_holder_pos) bearing_holder(holes=bearing_holes);
+    translate(bearing_holder_pos) bearing_holder();
     
     // bearing_clamp
-    translate(bearing_clamp_pos) bearing_clamp(axle_holes);
+    translate(bearing_clamp_pos) bearing_clamp();
     
     // connector
-    translate(shoulder_connector_pos) shoulder_connector(axle_holes);
+    translate(shoulder_connector_pos) shoulder_connector();
       
     // coupler
     translate(coupler_pos) coupler();
     
     // plate
-    translate(plate_pos) plate(bearing_holes);
+    translate(plate_pos) plate();
   }
 }
 

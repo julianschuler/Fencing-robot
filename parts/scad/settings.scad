@@ -58,6 +58,8 @@ shoulder_teeth_width = 35;
 plate_thickness = 5;
 coupler_diameter = 20;
 coupler_height = 25;
+axle_holes = 6;
+bearing_holes = 10;
 
 // gear settings
 modulus=2; 
