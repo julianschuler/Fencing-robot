@@ -1,0 +1,6 @@
+[submodule "parts/scad/libraries/nutsnbolts"]
+	path = parts/scad/libraries/nutsnbolts
+	url = https://github.com/JohK/nutsnbolts
+[submodule "parts/scad/libraries/MCAD"]
+	path = parts/scad/libraries/MCAD
+	url = https://github.com/openscad/MCAD
