@@ -1,2 +1,0 @@
-hand_connector
-elbow_wheel
