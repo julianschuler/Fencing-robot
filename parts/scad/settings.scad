@@ -24,8 +24,8 @@ thread_name = "M8";
 thread_diameter = 8;
 nut_height = 6.8;
 nut_diameter = 13;
-wall_thickness = 3.5;
-plane_thickness = 2.5;
+wall_thickness = 2.5;
+plane_thickness = 2;
 
 // screw seetings
 screw_type = "M5";
@@ -75,8 +75,8 @@ part_distance = 10;
 layer_height = 0.2;
 
 // clearances
-pressfit_clearance = 0.1;
-sliding_clearance = 0.2;
+pressfit_clearance = 0;
+sliding_clearance = 0.1;
 object_clearance = 0.5;
 
 // total amounts
@@ -114,6 +114,7 @@ pinion_radius = get_pinion_radius(modulus, teeth_pinion, teeth_wheel);
 shoulder_wheel_radius = get_wheel_radius(shoulder_modulus, shoulder_teeth, shoulder_teeth);
 
 upper_arm_rod_offset = pinion_radius + nut_diameter/2 + wall_thickness + object_clearance;
+rod_offset = max(thread_diameter/2 + wall_thickness, nut_diameter/(2 * cos(30)));
 
 
 pinion_pos = [294, wheel_radius + part_distance + spacer_diameter/2, 0];

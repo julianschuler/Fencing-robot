@@ -18,6 +18,15 @@ module threaded_rods() {
     - wheel_radius + teeth_width;
   elbow_rod_length = 2 * pinion_radius + nut_diameter + 2 * wall_thickness 
     + bearing_val(bearing_type_small)[h] + 2 * nut_height + 2 * spacer_thickness + 2 * object_clearance;
+  forearm_rod_length = forearm_length - thread_diameter/2;
+  
+  echo();
+  echo("\tThreaded rod lengths");
+  echo(str("\tOuter rods (2x):\t", outer_rod_length/10, "cm"));
+  echo(str("\tInner rod (1x):\t", inner_rod_length/10, "cm"));
+  echo(str("\tElbow rod  (1x):\t", elbow_rod_length/10, "cm"));
+  echo(str("\tForearm rods (2x):\t", forearm_rod_length/10, "cm"));
+  echo();
   
   if (assembled) {
     // upper arm
@@ -37,9 +46,9 @@ module threaded_rods() {
     
     // forearm
     translate([thread_diameter / 2, pinion_radius - thread_diameter / 2 - wall_thickness]) 
-      rotate ([0, 90, 0]) cylinder(d=thread_diameter, h=forearm_length);
+      rotate ([0, 90, 0]) cylinder(d=thread_diameter, h=forearm_rod_length);
     translate([thread_diameter / 2, -pinion_radius + thread_diameter / 2 + wall_thickness]) 
-      rotate ([0, 90, 0]) cylinder(d=thread_diameter, h=forearm_length);
+      rotate ([0, 90, 0]) cylinder(d=thread_diameter, h=forearm_rod_length);
   }
   else rotate([0, 90, 0]) {
     // upper arm
@@ -51,8 +60,8 @@ module threaded_rods() {
     translate (rod_pos(0)) cylinder(d=thread_diameter, h=elbow_rod_length);
     
     // forearm
-    translate(rod_pos(4)) cylinder(d=thread_diameter, h=forearm_length);
-    translate(rod_pos(5)) cylinder(d=thread_diameter, h=forearm_length);
+    translate(rod_pos(4)) cylinder(d=thread_diameter, h=forearm_rod_length);
+    translate(rod_pos(5)) cylinder(d=thread_diameter, h=forearm_rod_length);
   }
 }
 
