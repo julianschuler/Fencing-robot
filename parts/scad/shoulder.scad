@@ -164,8 +164,8 @@ module bearing_clamp() {
     translate([0, 0, -e]) 
       cylinder(h=height + bearing_val(bearing_type_big)[h]/2 + 2 * e, d=coupler_diameter 
         + 2 * object_clearance);
-    for (i = [0 : bearing_holes - 1]) {
-      rotate([0, 0, i * 360/bearing_holes])
+    for (i = [0 : axle_holes - 1]) {
+      rotate([0, 0, i * 360/axle_holes])
         translate([bearing_val(bearing_type_big)[id]/4 + coupler_diameter/4 + object_clearance/2 
           - pressfit_clearance, 0, -e]) 
             cylinder(h=height + bearing_val(bearing_type_big)[h]/2 + 2 * e, d=screw_diameter);
