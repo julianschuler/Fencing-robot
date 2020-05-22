@@ -16,12 +16,12 @@ module shoulder_wheel() {
       cube([stepper_size, stepper_size, shoulder_teeth_width - stepper_offset]);
     translate([0, 0, stepper_offset - stepper_thickness - object_clearance])
       cylinder(h=stepper_thickness + object_clearance + e, d=stepper_diameter + 2 * object_clearance);
-      
+    
     // stepper mounting holes
     for (i = [0 : stepper_holes - 1]) {
       rotate([0, 0, i * 360/stepper_holes]) translate([hole_offset, hole_offset, -e]) {
         cylinder(h=stepper_offset + 2 * e, d=screw_diameter);
-        rotate([0, 0, 135]) nutcatch_overhang(screw_type, screw_diameter);
+        rotate([0, 0, 135]) nutcatch_overhang(screw_type, screw_diameter, screw_nut_height);
       }
     }
     // arm mounting holes
@@ -46,11 +46,10 @@ module shoulder_wheel() {
       }
     }
     // arm mounting
-    for (i = [0 : axle_holes - 1]) {
+    for (i = [0 : axle_holes - 1]) stainless() {
       rotate([180, 0, i * 360/axle_holes]) translate([bearing_val(bearing_type_big)[id]/4 
         + coupler_diameter/4 + object_clearance/2 - pressfit_clearance, 0, 
-          -plane_thickness - screw_nut_height]) 
-            rotate([0, 0, 90]) stainless() nut(screw_type);
+          -plane_thickness - screw_nut_height]) rotate([0, 0, 90]) nut(screw_type);
     }
     translate([0, 0, stepper_offset]) stepper();
   }
@@ -114,7 +113,7 @@ module shoulder_connector(height = 15) {
 
 module bearing_holder() {
   _screw_name = "M5x20";
-  _screw_length = 19.3;
+  _screw_length = 18.8;
   
   offset = plane_thickness + screw_nut_height;
   height = bearing_val(bearing_type_big)[h] + offset;
@@ -130,7 +129,7 @@ module bearing_holder() {
         translate([bearing_val(bearing_type_big)[od]/2 + screw_diameter/2 + wall_thickness, 0, -e]) 
           cylinder(h=height + 2 * e, d=screw_diameter);
         translate([bearing_val(bearing_type_big)[od]/2 + screw_diameter/2 + wall_thickness, 0, 0]) 
-          rotate([0, 0, 90]) nutcatch_overhang(screw_type, screw_diameter);
+          rotate([0, 0, 90]) nutcatch_overhang(screw_type, screw_diameter, screw_nut_height);
       }
     }
   }
@@ -192,22 +191,6 @@ module plate() {
           cylinder(h=plate_thickness + 2 * e, d=screw_diameter, center=true);
       }
     }
-  }
-}
-
-
-module nutcatch_overhang(name, diameter, clearance=sliding_clearance) {
-  difference () {
-    translate([0, 0, -e]) rotate([180, 0, 0]) nutcatch_parallel(name, 
-      nut_height + 2 * layer_height + e, clearance);
-    translate([-diameter, diameter/2, nut_height]) 
-      cube([2 * diameter, diameter/2, 2 * layer_height + e]);
-    translate([-diameter, - diameter, nut_height]) 
-      cube([2 * diameter, diameter/2, 2 * layer_height + e]);
-    translate([diameter/2, -diameter, nut_height + layer_height]) 
-      cube([diameter/2, 2 * diameter, layer_height + e]);
-    translate([-diameter, -diameter, nut_height + layer_height]) 
-      cube([diameter/2, 2 * diameter, layer_height + e]);
   }
 }
 

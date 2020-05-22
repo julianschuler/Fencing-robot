@@ -37,15 +37,15 @@ module elbow_wheel() {
       translate ([0, -thread_diameter/2 - wall_thickness, 0]) 
         cube ([wheel_radius, thread_diameter + 2 * wall_thickness, 2 * pinion_radius]);
       translate ([thread_diameter/2 + nut_height/2 + wall_thickness, 0, pinion_radius]) 
-        roundedBox ([nut_height + 2 * wall_thickness, 2 * wall_thickness + nut_diameter, 2 * pinion_radius], wall_thickness, true);
+        roundedBox ([nut_height + 2 * wall_thickness, 2 * wall_thickness + nut_diameter, 
+          2 * pinion_radius], wall_thickness, true);
       cylinder(h=2 * pinion_radius, d=thread_diameter + 2 * wall_thickness);
     }
     // rod mount
     translate([0, 0, -e]) cylinder(h=2 * pinion_radius + 2 * e, d=thread_diameter);
-    translate([0, 0, rod_offset]) rotate ([0, 90, 0])
-      cylinder(h=wheel_radius + e, d=thread_diameter);
-    translate([0, 0, 2 * pinion_radius - rod_offset]) rotate ([0, 90, 0])
-      cylinder(h=wheel_radius + e, d=thread_diameter);
+    translate([0, 0, rod_offset]) cylinder_overhang(h=wheel_radius + e, d=thread_diameter);
+    translate([0, 0, 2 * pinion_radius - rod_offset]) 
+      cylinder_overhang(h=wheel_radius + e, d=thread_diameter);
     
     // nutcatches
     translate([thread_diameter/2 + wall_thickness, 0, rod_offset]) 
@@ -94,11 +94,10 @@ module elbow_connector() {
       }
       translate([0, 0, height/2 - bearing_val(bearing_type_small)[h]/2]) 
         cylinder(h=height/2 + bearing_val(bearing_type_small)[h]/2 + e, d=dia);
-      translate([0, 0, -e]) 
-        cylinder(h=height/2 - bearing_val(bearing_type_small)[h]/2 + 2 * e, 
+      translate([0, 0, -e]) cylinder(h=height/2 - bearing_val(bearing_type_small)[h]/2 + 2 * e, 
           d=spacer_diameter + 2 * object_clearance);
-      translate([-dia/2 - wall_thickness, 0, height/2]) rotate([0, 270, 0]) 
-        cylinder(h=wheel_radius -dia/2 - wall_thickness + spacer_thickness + e, d=thread_diameter);
+      translate([-wheel_radius - spacer_thickness - e, 0, height/2]) 
+        cylinder_overhang(h=wheel_radius -dia/2 - wall_thickness + spacer_thickness + e, d=thread_diameter);
       translate([-dia/2 - wall_thickness, 0, height/2]) rotate([0, 270, 180]) 
         nutcatch_sidecut(thread_name, l=2 * thread_diameter, clk=sliding_clearance, clh=sliding_clearance, 
           clsl=sliding_clearance);
