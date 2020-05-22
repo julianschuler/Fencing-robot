@@ -1,4 +1,5 @@
 include <settings.scad>
+use <libraries/MCAD/boxes.scad>
 use <utility.scad>
 
 
@@ -33,43 +34,45 @@ module elbow_wheel() {
       bevel_gear_wheel(modulus, teeth_pinion, teeth_wheel, teeth_width, 0, helix_angle=helix_angle);
       
       // rod mount
-      translate ([0, -thread_diameter/2 - wall_thickness]) 
+      translate ([0, -thread_diameter/2 - wall_thickness, 0]) 
         cube ([wheel_radius, thread_diameter + 2 * wall_thickness, 2 * pinion_radius]);
+      translate ([thread_diameter/2 + nut_height/2 + wall_thickness, 0, pinion_radius]) 
+        roundedBox ([nut_height + 2 * wall_thickness, 2 * wall_thickness + nut_diameter, 2 * pinion_radius], wall_thickness, true);
       cylinder(h=2 * pinion_radius, d=thread_diameter + 2 * wall_thickness);
     }
     // rod mount
     translate([0, 0, -e]) cylinder(h=2 * pinion_radius + 2 * e, d=thread_diameter);
-    translate([0, 0, thread_diameter/2 + wall_thickness]) rotate ([0, 90, 0])
+    translate([0, 0, rod_offset]) rotate ([0, 90, 0])
       cylinder(h=wheel_radius + e, d=thread_diameter);
-    translate([0, 0, 2 * pinion_radius - thread_diameter/2 - wall_thickness]) rotate ([0, 90, 0])
+    translate([0, 0, 2 * pinion_radius - rod_offset]) rotate ([0, 90, 0])
       cylinder(h=wheel_radius + e, d=thread_diameter);
     
     // nutcatches
-    translate([thread_diameter/2 + wall_thickness, 0, thread_diameter/2 + wall_thickness]) 
+    translate([thread_diameter/2 + wall_thickness, 0, rod_offset]) 
       rotate([0, 90, 180]) nutcatch_sidecut(thread_name, l=2 * thread_diameter, clk=sliding_clearance,
         clsl=sliding_clearance);
-    translate([thread_diameter/2 + wall_thickness, 0, 2 * pinion_radius - thread_diameter/2 -
-      wall_thickness]) rotate([0, 270, 0]) nutcatch_sidecut(thread_name, l=2 * thread_diameter, 
+    translate([thread_diameter/2 + wall_thickness, 0, 2 * pinion_radius - rod_offset]) 
+      rotate([0, 270, 0]) nutcatch_sidecut(thread_name, l=2 * thread_diameter, 
         clk=sliding_clearance, clsl=sliding_clearance);
   }
   
   if (assembled) {
     // spacers
-    translate([wheel_radius, 0, thread_diameter / 2 + wall_thickness]) rotate([0, 90, 0]) spacer();
-    translate([wheel_radius, 0, 2 * pinion_radius - thread_diameter / 2 - wall_thickness]) 
+    translate([wheel_radius, 0, rod_offset]) rotate([0, 90, 0]) spacer();
+    translate([wheel_radius, 0, 2 * pinion_radius - rod_offset]) 
       rotate([0, 90, 0]) spacer();
 
     if (show_all) {
       // nuts
-      translate([thread_diameter/2 + wall_thickness, 0, thread_diameter/2 + wall_thickness]) 
+      translate([thread_diameter/2 + wall_thickness, 0, rod_offset]) 
         rotate([0, 270, 0]) stainless() nut(thread_name);
       translate([thread_diameter/2 + wall_thickness, 0, 
-        2 * pinion_radius - thread_diameter/2 - wall_thickness]) rotate([0, 270, 0]) 
+        2 * pinion_radius - rod_offset]) rotate([0, 270, 0]) 
           stainless() nut(thread_name);
-      translate([wheel_radius + spacer_thickness, 0, thread_diameter/2 + wall_thickness]) 
+      translate([wheel_radius + spacer_thickness, 0, rod_offset]) 
         rotate([0, 270, 0]) stainless() nut(thread_name);
       translate([wheel_radius + spacer_thickness, 0, 
-        2 * pinion_radius - thread_diameter/2 - wall_thickness]) 
+        2 * pinion_radius - rod_offset]) 
           rotate([0, 270, 0]) stainless() nut(thread_name);
     }
   }
