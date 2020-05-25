@@ -29,3 +29,8 @@ module bevel_gear_wheel(modulus, teeth_pinion, teeth_wheel, teeth_width, hole_di
       pfeilkegelrad(modulus, teeth_wheel, atan(teeth_wheel/teeth_pinion), teeth_width, hole_diameter, 
         pressure_angle, helix_angle);
 }
+
+
+module spur_gear(modulus, teeth, teeth_width, hole_diameter, helix_angle=0, pressure_angle=20) {
+  pfeilrad(modulus, teeth, teeth_width, hole_diameter, pressure_angle, helix_angle, optimiert=false);
+}
