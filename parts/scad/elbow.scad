@@ -66,21 +66,19 @@ module elbow_wheel() {
       // nuts
       translate([thread_diameter/2 + wall_thickness, 0, rod_offset]) 
         rotate([0, 270, 0]) stainless() nut(thread_name);
-      translate([thread_diameter/2 + wall_thickness, 0, 
-        2 * pinion_radius - rod_offset]) rotate([0, 270, 0]) 
-          stainless() nut(thread_name);
+      translate([thread_diameter/2 + wall_thickness, 0, 2 * pinion_radius - rod_offset]) 
+        rotate([0, 270, 0]) stainless() nut(thread_name);
       translate([wheel_radius + spacer_thickness, 0, rod_offset]) 
         rotate([0, 270, 0]) stainless() nut(thread_name);
-      translate([wheel_radius + spacer_thickness, 0, 
-        2 * pinion_radius - rod_offset]) 
-          rotate([0, 270, 0]) stainless() nut(thread_name);
+      translate([wheel_radius + spacer_thickness, 0, 2 * pinion_radius - rod_offset]) 
+        rotate([0, 270, 0]) stainless() nut(thread_name);
     }
   }
 }
 
 
 module elbow_connector() {
-  dia = bearing_val(bearing_type_small)[od] + 2 * pressfit_clearance;
+  dia = bearing_small[od_pos] + 2 * pressfit_clearance;
   height = nut_diameter + 2 * wall_thickness;
   
   translate([0, 0, object_clearance]) {
@@ -92,10 +90,10 @@ module elbow_connector() {
         translate([0, 0, height/2]) rotate([0, 270, 0]) 
           cylinder(h=wheel_radius + spacer_thickness, d=height);
       }
-      translate([0, 0, height/2 - bearing_val(bearing_type_small)[h]/2]) 
-        cylinder(h=height/2 + bearing_val(bearing_type_small)[h]/2 + e, d=dia);
-      translate([0, 0, -e]) cylinder(h=height/2 - bearing_val(bearing_type_small)[h]/2 + 2 * e, 
-          d=spacer_diameter + 2 * object_clearance);
+      translate([0, 0, height/2 - bearing_small[h_pos]/2]) 
+        cylinder(h=height/2 + bearing_small[h_pos]/2 + e, d=dia);
+      translate([0, 0, -e]) cylinder(h=height/2 - bearing_small[h_pos]/2 + 2 * e, d=spacer_diameter 
+        + 2 * object_clearance);
       translate([-wheel_radius - spacer_thickness - e, 0, height/2]) 
         cylinder_overhang(h=wheel_radius -dia/2 - wall_thickness + spacer_thickness + e, d=thread_diameter);
       translate([-dia/2 - wall_thickness, 0, height/2]) rotate([0, 270, 180]) 
@@ -106,19 +104,20 @@ module elbow_connector() {
     
     if (assembled) {
       // spacers
-      translate([0, 0, height/2 + bearing_val(bearing_type_small)[h]/2]) spacer();
+      translate([0, 0, height/2 + bearing_small[h_pos]/2]) spacer();
       translate([0, 0, -object_clearance]) 
-        spacer(height/2 - bearing_val(bearing_type_small)[h]/2 + object_clearance);
+        spacer(height/2 - bearing_small[h_pos]/2 + object_clearance);
       
       if (show_all) {
         // nuts
         translate([-dia/2 - wall_thickness - pressfit_clearance, 0, height/2]) rotate([0, 90, 0]) 
           stainless() nut(thread_name);
-        translate([0, 0, height/2 + bearing_val(bearing_type_small)[h]/2 + spacer_thickness + nut_height]) 
+        translate([0, 0, height/2 + bearing_small[h_pos]/2 + spacer_thickness + nut_height]) 
           stainless() nut(thread_name);
         
         // bearings
-        bearing(pos=[0, 0, height/2 - bearing_val(bearing_type_small)[h]/2], model=bearing_type_small);
+        translate([0, 0, height/2 - bearing_small[h_pos]/2]) 
+          steel() bearing(bearing_small);
       }
     }
   }
@@ -128,20 +127,19 @@ module elbow_connector() {
 module elbow_pinion_connector(dual_nuts=true) {
   shoulder_teeth_width = nut_diameter + 2 * wall_thickness;
   length = 2 * upper_arm_rod_offset;
-  height = bearing_val(bearing_type_small)[h] + plane_thickness;
+  height = bearing_small[h_pos] + plane_thickness;
   
   difference() {
     union() {
       translate([0, 0, height/2]) cube([shoulder_teeth_width, length, height], center=true);
-      cylinder(h=height, d=bearing_val(bearing_type_small)[od] + 2 * wall_thickness 
-        + 2 * pressfit_clearance);
+      cylinder(h=height, d=bearing_small[od_pos] + 2 * wall_thickness + 2 * pressfit_clearance);
       translate([0, length/2, 0]) cylinder(h=height, d=shoulder_teeth_width);
       translate([0, -length/2, 0]) cylinder(h=height, d=shoulder_teeth_width);
     }
     translate([0, 0, -e]) cylinder(h=plane_thickness + 2 * e, d=spacer_diameter + 2 * object_clearance);
     translate([0, 0, plane_thickness]) 
-      cylinder(h=bearing_val(bearing_type_small)[h] + pressfit_clearance + e, 
-        d=bearing_val(bearing_type_small)[od] + 2 * pressfit_clearance);
+      cylinder(h=bearing_small[h_pos] + pressfit_clearance + e, d=bearing_small[od_pos] 
+        + 2 * pressfit_clearance);
     translate([0, length/2, -e]) cylinder(h=height + 2 * e, d=thread_diameter);
     translate([0, -length/2, -e]) cylinder(h=height + 2 * e, d=thread_diameter);
   }
@@ -169,7 +167,7 @@ module elbow_pinion_connector(dual_nuts=true) {
       }
       
       //bearing
-      bearing(pos=[0, 0, plane_thickness], model=bearing_type_small);
+      translate([0, 0, plane_thickness]) steel() bearing(bearing_small);
     }
   }
 }

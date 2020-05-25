@@ -26,7 +26,7 @@ module shoulder_wheel() {
     }
     // arm mounting holes
     for (i = [0 : axle_holes - 1]) {
-      rotate([0, 0, i * 360/axle_holes]) translate([bearing_val(bearing_type_big)[id]/4 + coupler_diameter/4
+      rotate([0, 0, i * 360/axle_holes]) translate([bearing_large[id_pos]/4 + coupler_diameter/4
         + object_clearance/2 - pressfit_clearance, 0, -e]) {
           cylinder(h=shoulder_teeth_width + e, d=screw_diameter);
           translate([0, 0, plane_thickness + screw_nut_height + e]) 
@@ -47,7 +47,7 @@ module shoulder_wheel() {
     }
     // arm mounting
     for (i = [0 : axle_holes - 1]) stainless() {
-      rotate([180, 0, i * 360/axle_holes]) translate([bearing_val(bearing_type_big)[id]/4 
+      rotate([180, 0, i * 360/axle_holes]) translate([bearing_large[id_pos]/4 
         + coupler_diameter/4 + object_clearance/2 - pressfit_clearance, 0, 
           -plane_thickness - screw_nut_height]) rotate([0, 0, 90]) nut(screw_type);
     }
@@ -66,23 +66,21 @@ module shoulder_connector(height = 15) {
   
   difference() {
     union() {
-      cylinder(h=total_height, d=bearing_val(bearing_type_big)[od]/2 + bearing_val(bearing_type_big)[id]/2 
-        - object_clearance);
-      cylinder(h=total_height + bearing_val(bearing_type_big)[h]/2, d=bearing_val(bearing_type_big)[id] 
-        - 2 * pressfit_clearance);
+      cylinder(h=total_height, d=bearing_large[od_pos]/2 + bearing_large[id_pos]/2 - object_clearance);
+      cylinder(h=total_height + bearing_large[h_pos]/2, d=bearing_large[id_pos] - 2 * pressfit_clearance);
       translate([0, 0, height/2]) cube([shoulder_teeth_width, length, height], center=true);
       translate([0, length/2, 0]) cylinder(h=height, d=shoulder_teeth_width);
       translate([0, -length/2, 0]) cylinder(h=height, d=shoulder_teeth_width);
     }
-    translate([0, 0, -e]) cylinder(h=total_height + bearing_val(bearing_type_big)[h]/2 + 2 * e, 
+    translate([0, 0, -e]) cylinder(h=total_height + bearing_large[h_pos]/2 + 2 * e, 
       d=thread_diameter + 2 * object_clearance);
     translate([0, length/2, -e]) cylinder(h=height + 2 * e, d=thread_diameter);
     translate([0, -length/2, -e]) cylinder(h=height + 2 * e, d=thread_diameter);
     for (i = [0 : axle_holes - 1]) {
       rotate([0, 0, i * 360/axle_holes])
-        translate([bearing_val(bearing_type_big)[id]/4 + coupler_diameter/4 + object_clearance/2 
-          - pressfit_clearance, 0, -e]) 
-            cylinder(h=total_height + bearing_val(bearing_type_big)[h]/2 + 2 * e, d=screw_diameter);
+        translate([bearing_large[id_pos]/4 + coupler_diameter/4 + object_clearance/2 - pressfit_clearance, 
+          0, -e]) 
+            cylinder(h=total_height + bearing_large[h_pos]/2 + 2 * e, d=screw_diameter);
     }
   }
   
@@ -103,7 +101,7 @@ module shoulder_connector(height = 15) {
       // screws
       for (i = [0 : axle_holes - 1]) {
         rotate([0, 180, i * 360/axle_holes])
-          translate([bearing_val(bearing_type_big)[id]/4 + coupler_diameter/4 + object_clearance/2 
+          translate([bearing_large[id_pos]/4 + coupler_diameter/4 + object_clearance/2 
             - pressfit_clearance, 0, 0]) screw(_screw_name);
       }
     }
@@ -116,19 +114,19 @@ module bearing_holder() {
   _screw_length = 18.8;
   
   offset = plane_thickness + screw_nut_height;
-  height = bearing_val(bearing_type_big)[h] + offset;
+  height = bearing_large[h_pos] + offset;
   
   difference() {
-    cylinder(h=height, d=bearing_val(bearing_type_big)[od] + 4 * wall_thickness + 2 * screw_diameter);
+    cylinder(h=height, d=bearing_large[od_pos] + 4 * wall_thickness + 2 * screw_diameter);
     translate([0, 0, offset]) 
-      cylinder(h=height - offset + e, d=bearing_val(bearing_type_big)[od] + 2 * pressfit_clearance);
-    translate([0, 0, -e]) cylinder(h=offset + 2 * e, d=bearing_val(bearing_type_big)[od]/2 
-      + bearing_val(bearing_type_big)[id]/2 + object_clearance);
+      cylinder(h=height - offset + e, d=bearing_large[od_pos] + 2 * pressfit_clearance);
+    translate([0, 0, -e]) cylinder(h=offset + 2 * e, d=bearing_large[od_pos]/2 
+      + bearing_large[id_pos]/2 + object_clearance);
     for (i = [0 : bearing_holes - 1]) {
       rotate([0, 0, i * 360/bearing_holes]) {
-        translate([bearing_val(bearing_type_big)[od]/2 + screw_diameter/2 + wall_thickness, 0, -e]) 
+        translate([bearing_large[od_pos]/2 + screw_diameter/2 + wall_thickness, 0, -e]) 
           cylinder(h=height + 2 * e, d=screw_diameter);
-        translate([bearing_val(bearing_type_big)[od]/2 + screw_diameter/2 + wall_thickness, 0, 0]) 
+        translate([bearing_large[od_pos]/2 + screw_diameter/2 + wall_thickness, 0, 0]) 
           rotate([0, 0, 90]) nutcatch_overhang(screw_type, screw_diameter, screw_nut_height);
       }
     }
@@ -136,15 +134,14 @@ module bearing_holder() {
   
   if (assembled) {
     // bearing
-    translate([0, 0, offset])
-      bearing(model=bearing_type_big);
+    translate([0, 0, offset]) steel() bearing(bearing_large);
     // nuts and bolts
     for (i = [0 : bearing_holes - 1]) stainless() {
       rotate([0, 0, i * 360/bearing_holes]) {
-        translate([bearing_val(bearing_type_big)[od]/2 + screw_diameter/2 + wall_thickness, 0, 
-          _screw_length]) screw(_screw_name);
-        translate([bearing_val(bearing_type_big)[od]/2 + screw_diameter/2 + wall_thickness, 0, 
-          screw_nut_height]) rotate([0, 0, 90]) nut(screw_type);
+        translate([bearing_large[od_pos]/2 + screw_diameter/2 + wall_thickness, 0, _screw_length]) 
+          screw(_screw_name);
+        translate([bearing_large[od_pos]/2 + screw_diameter/2 + wall_thickness, 0, screw_nut_height]) 
+          rotate([0, 0, 90]) nut(screw_type);
       }
     }
   }
@@ -155,19 +152,16 @@ module bearing_clamp() {
   height = plane_thickness + screw_nut_height + object_clearance;
   difference() {
     union() {
-      cylinder(h=height, d=bearing_val(bearing_type_big)[od]/2 + bearing_val(bearing_type_big)[id]/2 
-        - object_clearance);
-      cylinder(h=height + bearing_val(bearing_type_big)[h]/2, d=bearing_val(bearing_type_big)[id] 
-        - 2 * pressfit_clearance);
+      cylinder(h=height, d=bearing_large[od_pos]/2 + bearing_large[id_pos]/2 - object_clearance);
+      cylinder(h=height + bearing_large[h_pos]/2, d=bearing_large[id_pos] - 2 * pressfit_clearance);
     }
     translate([0, 0, -e]) 
-      cylinder(h=height + bearing_val(bearing_type_big)[h]/2 + 2 * e, d=coupler_diameter 
-        + 2 * object_clearance);
+      cylinder(h=height + bearing_large[h_pos]/2 + 2 * e, d=coupler_diameter + 2 * object_clearance);
     for (i = [0 : axle_holes - 1]) {
       rotate([0, 0, i * 360/axle_holes])
-        translate([bearing_val(bearing_type_big)[id]/4 + coupler_diameter/4 + object_clearance/2 
+        translate([bearing_large[id_pos]/4 + coupler_diameter/4 + object_clearance/2 
           - pressfit_clearance, 0, -e]) 
-            cylinder(h=height + bearing_val(bearing_type_big)[h]/2 + 2 * e, d=screw_diameter);
+            cylinder(h=height + bearing_large[h_pos]/2 + 2 * e, d=screw_diameter);
     }
   }
 }
@@ -183,11 +177,11 @@ module coupler() {
 module plate() {
   steel() difference() {
     cube([100, 100, plate_thickness], center=true);
-    cylinder(h=plate_thickness + 2 * e, d=bearing_val(bearing_type_big)[od]/2 
-      + bearing_val(bearing_type_big)[id]/2 + object_clearance, center=true);
+    cylinder(h=plate_thickness + 2 * e, d=bearing_large[od_pos]/2 
+      + bearing_large[id_pos]/2 + object_clearance, center=true);
     for (i = [0 : bearing_holes - 1]) {
       rotate([0, 0, i * 360/bearing_holes]) {
-        translate([bearing_val(bearing_type_big)[od]/2 + screw_diameter/2 + wall_thickness, 0, 0]) 
+        translate([bearing_large[od_pos]/2 + screw_diameter/2 + wall_thickness, 0, 0]) 
           cylinder(h=plate_thickness + 2 * e, d=screw_diameter, center=true);
       }
     }
@@ -195,21 +189,12 @@ module plate() {
 }
 
 
-module gears() {
-  // gears
-  translate([0, get_wheel_radius(shoulder_modulus, shoulder_teeth, shoulder_teeth), 
-    get_wheel_radius(shoulder_modulus, shoulder_teeth, shoulder_teeth)]) 
-      rotate([90, 180, 0]) {
-        bevel_gear_pinion(shoulder_modulus, shoulder_teeth, shoulder_teeth, shoulder_teeth_width, 0,
-          helix_angle=helix_angle);
-        rotate([0, 180, 0]) 
-          bevel_gear_wheel(modulus, teeth_pinion, teeth_wheel, teeth_width, 0, helix_angle=helix_angle);
-      }
-    
-    
-  translate([0, -get_wheel_radius(shoulder_modulus, shoulder_teeth, shoulder_teeth), 
-    get_wheel_radius(shoulder_modulus, shoulder_teeth, shoulder_teeth)]) 
-      rotate([270, 180, 0]) bevel_gear_pinion(shoulder_modulus, shoulder_teeth, shoulder_teeth,
-        shoulder_teeth_width, 0, helix_angle=helix_angle);
-
+module shoulder_gear() {
+  difference() {
+    union() {
+      translate([0, 0, teeth_width]) bevel_gear_pinion(shoulder_modulus, shoulder_teeth, shoulder_teeth,
+        shoulder_teeth_width, 0, helix_angle);
+      rotate([0, 0, 0]) spur_gear(shoulder_modulus, shoulder_teeth, teeth_width, 0, helix_angle);
+    }
+  }
 }

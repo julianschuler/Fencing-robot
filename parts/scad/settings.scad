@@ -1,9 +1,9 @@
 use <libraries/nutsnbolts/cyl_head_bolt.scad>
 use <libraries/nutsnbolts/materials.scad>
-use <libraries/MCAD/bearing.scad>
 use <gears.scad>
 use <foil.scad>
 use <stepper.scad>
+use <bearing.scad>
 
 
 
@@ -36,8 +36,9 @@ screw_head_height = 5;
 screw_nut_height = 4.7;
 
 // bearing_settings
-bearing_type_small = 608;
-bearing_type_big = 6808;
+bearing_small  = [22,  8, 7]; // 608
+bearing_medium = [47, 35, 7]; // 6807 / 61807
+bearing_large  = [52, 40, 7]; // 6808 / 61808
 
 // spacer_settings
 spacer_diameter= 15;
@@ -52,9 +53,9 @@ hand_square_size = 6;
 hand_spacer_diameter = 25;
 
 // shoulder settings
-shoulder_modulus = 3;
-shoulder_teeth = 45;
-shoulder_teeth_width = 35;
+shoulder_modulus = 2;
+shoulder_teeth = 70;
+shoulder_teeth_width = 40;
 plate_thickness = 5;
 coupler_diameter = 20;
 coupler_height = 25;
@@ -90,9 +91,9 @@ $fa = $preview ? 20 : 6;
 $fs = $preview ? 1 : 0.2;
 
 // constants
-od = 0;
-id = 1;
-h = 2;
+od_pos = 0;
+id_pos = 1;
+h_pos = 2;
 
 
 /*******************************************************************************
@@ -124,18 +125,18 @@ hand_pos = wheel_pos + [wheel_radius + part_distance + thread_diameter/2 + wall_
 elbow_pinion_connector_pos = pinion_pos - [wheel_radius + spacer_thickness + nut_diameter/2 + wall_thickness 
                     + part_distance, 0, 0];
 
-shoulder_connector_pos = elbow_pinion_connector_pos - [bearing_val(bearing_type_big)[od]/4 
-                    + bearing_val(bearing_type_big)[id]/4 + wall_thickness 
-                    + bearing_val(bearing_type_small)[od]/2 + part_distance, 0, 0];
+shoulder_connector_pos = elbow_pinion_connector_pos - [bearing_large[od_pos]/4 
+                    + bearing_large[id_pos]/4 + wall_thickness 
+                    + bearing_small[od_pos]/2 + part_distance, 0, 0];
 
-bearing_clamp_pos = shoulder_connector_pos - [bearing_val(bearing_type_big)[od]/2 
-                    + bearing_val(bearing_type_big)[id]/2 + part_distance, 0, 0];
+bearing_clamp_pos = shoulder_connector_pos - [bearing_large[od_pos]/2 
+                    + bearing_large[id_pos]/2 + part_distance, 0, 0];
 
-bearing_holder_pos = bearing_clamp_pos - [3 * bearing_val(bearing_type_big)[od]/4 
-                    + bearing_val(bearing_type_big)[id]/4 + 2 * wall_thickness 
+bearing_holder_pos = bearing_clamp_pos - [3 * bearing_large[od_pos]/4 
+                    + bearing_large[id_pos]/4 + 2 * wall_thickness 
                     + screw_diameter + part_distance, 0, 0];
 
-shoulder_wheel_pos = bearing_holder_pos -[shoulder_wheel_radius + bearing_val(bearing_type_big)[od]/2 
+shoulder_wheel_pos = bearing_holder_pos -[shoulder_wheel_radius + bearing_large[od_pos]/2 
                     + 2 * wall_thickness + screw_diameter + part_distance, 0, 0];
 
 coupler_pos = [coupler_diameter/2, bearing_pos(0)[1], 0];
@@ -151,8 +152,8 @@ guard_pos = [get_guard_diameter()/2, blade_pos[1] - part_distance - get_blade_wi
               get_guard_diameter()/2, get_guard_height()];
 
 
-special_spacers = [nut_diameter/2 + wall_thickness - bearing_val(bearing_type_small)[h]/2 + object_clearance,
-                nut_diameter/2 + wall_thickness - bearing_val(bearing_type_small)[h]/2 + object_clearance];
+special_spacers = [nut_diameter/2 + wall_thickness - bearing_small[h_pos]/2 + object_clearance,
+                nut_diameter/2 + wall_thickness - bearing_small[h_pos]/2 + object_clearance];
 
 
 
@@ -161,12 +162,10 @@ function spacer_pos(i) = [spacer_diameter/2 + i * (spacer_diameter + part_distan
 function nut_pos(i) = [nut_diameter/(2 * cos(30)) + i * (nut_diameter/cos(30) + part_distance), 
                         spacer_pos(0)[1] - part_distance - spacer_diameter/2 - nut_diameter/2, nut_height];
 
-function bearing_pos(i) = [bearing_val(bearing_type_small)[od]/2 + coupler_diameter + part_distance 
-                          + i * (bearing_val(bearing_type_small)[od] + part_distance), nut_pos(0)[1]
-                          - part_distance - nut_diameter/2 - bearing_val(bearing_type_small)[od]/2, 0];
+function bearing_pos(i) = [bearing_small[od_pos]/2 + coupler_diameter + part_distance 
+                          + i * (bearing_small[od_pos] + part_distance), nut_pos(0)[1]
+                          - part_distance - nut_diameter/2 - bearing_small[od_pos]/2, 0];
 
 function rod_pos(i) = [-thread_diameter/2, bearing_pos(0)[1] - part_distance 
-                        - bearing_val(bearing_type_small)[od]/2 - thread_diameter/2 
+                        - bearing_small[od_pos]/2 - thread_diameter/2 
                         - i * (part_distance + thread_diameter), 0];
-
-function bearing_val(type) = [bearingOuterDiameter(type), bearingInnerDiameter(type), bearingWidth(type)];
