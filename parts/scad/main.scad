@@ -75,35 +75,81 @@ module foil() {
 }
 
 
+module shoulder_module_joint() {
+  // wheel
+  shoulder_wheel();
+  
+  // bearing holder
+  translate([0, 0, -object_clearance]) rotate([0, 180, 180]) bearing_holder_large();
+  
+  // bearing_clamp
+  rotate([0, 180, 180]) bearing_clamp_large();
+  
+  // connector
+  connector_offset = 15 + plane_thickness + screw_nut_height + bearing_large[h_pos] 
+    + nut_height + spacer_thickness + plate_thickness + screw_head_height + 2 * object_clearance;
+  translate([0, 0, -connector_offset]) shoulder_connector();
+    
+  // coupler
+  translate([0, 0, stepper_offset - get_axle_length() - coupler_height/2]) coupler();
+  
+  // plate
+  translate([0, 0, -screw_nut_height - object_clearance - plate_thickness/2 
+    - bearing_large[h_pos] - pressfit_clearance - plane_thickness]) plate();
+}
+
+
+module shoulder_module_side(dir=1) {
+  bearing_holder_height = screw_nut_height + plane_thickness + bearing_medium[h_pos];
+  offset = 2 * plate_thickness + screw_head_height + 2 * object_clearance;
+  pinion_offset = shoulder_modulus * (spur_wheel_teeth + spur_pinion_teeth) / 2;
+  clamp_offset = 3 * object_clearance/2 + plate_thickness + screw_head_height/2;
+  
+  // bevel gear pinion
+  shoulder_pinion();
+  
+  // bearing holder
+  translate([0, 0, bearing_holder_height - object_clearance]) 
+    rotate([0, 180, 180]) bearing_holder_wide();
+    
+  // bearing clamp
+  translate([0, 0, -clamp_offset]) bearing_clamp_halve();
+  translate([0, 0, -clamp_offset]) rotate([180, 0, 180]) bearing_clamp_halve();
+  
+  // bearing holder
+  translate([0, 0, -offset - bearing_holder_height]) bearing_holder();
+  
+  // shoulder spur wheel
+  translate([0, 0, -offset - object_clearance - spur_teeth_width]) shoulder_spur_wheel();
+  
+  rotate([0, 0, dir * shoulder_angle]) {
+    // shoulder spur pinion
+    translate([0, -pinion_offset, -spur_teeth_width - offset - object_clearance]) 
+      rotate([0, 0, dir * shoulder_angle * spur_wheel_teeth/spur_pinion_teeth]) shoulder_spur_pinion();
+    
+    // stepper plate
+    translate([0, 0, -offset]) stepper_plate();
+  }
+  
+  // side plate
+  translate([0, 0, -plate_thickness - object_clearance]) side_plate();
+}
+
+
 module shoulder_module() {
   if (assembled) {
     rotate([0, elbow_angle, 0]) translate([-upper_arm_length + shoulder_wheel_radius, 0, 0]) 
       rotate([0, 270, 0]) {
-        // wheel
-        shoulder_wheel();
+        // shoulder joint
+        shoulder_module_joint();
         
-        // side gears
-        translate([0, get_wheel_radius(shoulder_modulus, shoulder_teeth, shoulder_teeth) + teeth_width, 
+        // sides
+        translate([0, get_wheel_radius(shoulder_modulus, shoulder_teeth, shoulder_teeth), 
           get_wheel_radius(shoulder_modulus, shoulder_teeth, shoulder_teeth)]) 
-            rotate([90, 180, 0]) shoulder_gear();
-        
-        // bearing holder
-        translate([0, 0, -object_clearance]) rotate([0, 180, 180]) bearing_holder();
-        
-        // bearing_clamp
-        rotate([0, 180, 180]) bearing_clamp();
-        
-        // connector
-        connector_offset = 15 + plane_thickness + screw_nut_height + bearing_large[h_pos] 
-          + nut_height + spacer_thickness + plate_thickness + screw_head_height + 2 * object_clearance;
-        translate([0, 0, -connector_offset]) shoulder_connector();
-          
-        // coupler
-        translate([0, 0, stepper_offset - get_axle_length() - coupler_height/2]) coupler();
-        
-        // plate
-        translate([0, 0, -screw_nut_height - object_clearance - plate_thickness/2 
-          - bearing_large[h_pos] - pressfit_clearance - plane_thickness]) plate();
+            rotate([90, 180, 0]) shoulder_module_side(1);
+        translate([0, -get_wheel_radius(shoulder_modulus, shoulder_teeth, shoulder_teeth), 
+          get_wheel_radius(shoulder_modulus, shoulder_teeth, shoulder_teeth)]) 
+            rotate([270, 0, 0]) shoulder_module_side(-1);
     }
   }
   else {
@@ -114,7 +160,7 @@ module shoulder_module() {
     translate(bearing_holder_pos) bearing_holder();
     
     // bearing_clamp
-    translate(bearing_clamp_pos) bearing_clamp();
+    translate(bearing_clamp_pos) bearing_clamp_large();
     
     // connector
     translate(shoulder_connector_pos) shoulder_connector();

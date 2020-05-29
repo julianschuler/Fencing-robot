@@ -14,8 +14,9 @@ use <bearing.scad>
 // set true to show assembled version
 previewAssembly = true;
 
-// angle at the elbow joint when assembled
+// angle at the elbow and shoulder joints when assembled
 elbow_angle = 80;
+shoulder_angle = 80;
 
 // general settings
 upper_arm_length = 350;
@@ -33,6 +34,7 @@ screw_name = "M5x25";
 screw_diameter = 5;
 screw_length = 25;
 screw_head_height = 5;
+screw_head_diameter = 8.5;
 screw_nut_height = 4.7;
 
 // bearing_settings
@@ -56,7 +58,10 @@ hand_spacer_diameter = 25;
 shoulder_modulus = 2;
 shoulder_teeth = 70;
 shoulder_teeth_width = 40;
-plate_thickness = 5;
+spur_pinion_teeth = 20;
+spur_wheel_teeth = 90;
+spur_teeth_width = 20;
+plate_thickness = 6;
 coupler_diameter = 20;
 coupler_height = 25;
 axle_holes = 6;
@@ -108,6 +113,7 @@ stepper_holes = get_hole_count();
 stepper_offset = screw_length - get_plate_thickness();
 stepper_thickness = get_extrusion_thickness();
 stepper_diameter = get_extrusion_diameter();
+stepper_plate_thickness = get_plate_thickness() - get_extrusion_thickness();
 
 wheel_radius = get_wheel_radius(modulus, teeth_pinion, teeth_wheel);
 pinion_radius = get_pinion_radius(modulus, teeth_pinion, teeth_wheel);

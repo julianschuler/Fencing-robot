@@ -6,7 +6,7 @@ Nema23Custom = [
     [NemaModel, 23],
     [NemaLengthShort, 39*mm],
     [NemaLengthMedium, 54*mm],
-    [NemaLengthLong, 85*mm],
+    [NemaLengthLong, 83.5*mm],
     [NemaSideSize, 56.4*mm], 
     [NemaDistanceBetweenMountingHoles, 47.14*mm], 
     [NemaMountingHoleDiameter, 4.75*mm], 
@@ -35,5 +35,5 @@ function get_extrusion_thickness() = lookup(NemaRoundExtrusionHeight, Nema23Cust
 
 
 module stepper() {
-  translate([0, 0, get_extrusion_thickness()]) motor(Nema23Custom, NemaLong);
+  translate([0, 0, -get_extrusion_thickness()]) motor(Nema23Custom, NemaLong);
 }
