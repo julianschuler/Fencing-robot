@@ -31,11 +31,14 @@ plane_thickness = 2;
 // screw seetings
 screw_type = "M5";
 screw_name = "M5x25";
+screw_name_long = "M5x50";
 screw_diameter = 5;
 screw_length = 25;
+screw_length_long = 60;
 screw_head_height = 5;
 screw_head_diameter = 8.5;
 screw_nut_height = 4.7;
+screw_nut_diameter = 8;
 
 // bearing_settings
 bearing_small  = [22,  8, 7]; // 608
@@ -62,13 +65,23 @@ spur_pinion_teeth = 20;
 spur_wheel_teeth = 90;
 spur_teeth_width = 20;
 plate_thickness = 6;
+plate_width = 100;
 coupler_diameter = 20;
 coupler_height = 25;
 axle_holes = 6;
 bearing_holes = 10;
+plate_holes = 3;
+side_plate_holes = 4;
+bracket_orientation = 0;
+bracket_holes = 7;
+bracket_width = 20;
+chamfer_depth = 7;
+plate_clearance = 10;
+outer_screws = 4;
+inner_screws = 4;
 
 // gear settings
-modulus=2; 
+modulus=2;
 teeth_pinion=20;
 teeth_wheel=60;
 teeth_width=20;
@@ -108,7 +121,13 @@ h_pos = 2;
 show_all = $preview;
 assembled = $preview ? previewAssembly : false;
 
-stepper_size = get_side_size() + 2 * sliding_clearance;
+total_short_screws = 5 * bearing_holes + 2 * bracket_holes + 2 * outer_screws + inner_screws;
+total_long_screws = 3 * axle_holes;
+total_screws = total_short_screws + total_long_screws;
+screw_spacing = max(screw_head_diameter/cos(30) + part_distance, screw_head_diameter + part_distance);
+screw_clearance = max(screw_nut_diameter/(2 * cos(30)), screw_head_diameter/2);
+
+stepper_size = get_side_size() + 2 * pressfit_clearance;
 stepper_holes = get_hole_count();
 stepper_offset = screw_length - get_plate_thickness();
 stepper_thickness = get_extrusion_thickness();
@@ -168,9 +187,15 @@ function spacer_pos(i) = [spacer_diameter/2 + i * (spacer_diameter + part_distan
 function nut_pos(i) = [nut_diameter/(2 * cos(30)) + i * (nut_diameter/cos(30) + part_distance), 
                         spacer_pos(0)[1] - part_distance - spacer_diameter/2 - nut_diameter/2, nut_height];
 
+function screw_nut_pos(i) = [screw_clearance + i * screw_spacing, nut_pos(0)[1] - part_distance 
+                              - nut_diameter/2 - screw_nut_diameter/2, screw_nut_height];
+
+function screw_pos(i, length) = [screw_clearance + i * screw_spacing, screw_nut_pos(0)[1] - part_distance 
+                                  - screw_nut_diameter/2 - length, screw_head_diameter/2];
+
 function bearing_pos(i) = [bearing_small[od_pos]/2 + coupler_diameter + part_distance 
-                          + i * (bearing_small[od_pos] + part_distance), nut_pos(0)[1]
-                          - part_distance - nut_diameter/2 - bearing_small[od_pos]/2, 0];
+                          + i * (bearing_small[od_pos] + part_distance), screw_pos(0, 50)[1]
+                          - part_distance - screw_head_height - bearing_small[od_pos]/2, 0];
 
 function rod_pos(i) = [-thread_diameter/2, bearing_pos(0)[1] - part_distance 
                         - bearing_small[od_pos]/2 - thread_diameter/2 

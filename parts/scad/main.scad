@@ -2,6 +2,7 @@ include <settings.scad>
 use <hand.scad>
 use <elbow.scad>
 use <shoulder.scad>
+use <plates.scad>
 use <utility.scad>
 
 
@@ -94,8 +95,8 @@ module shoulder_module_joint() {
   translate([0, 0, stepper_offset - get_axle_length() - coupler_height/2]) coupler();
   
   // plate
-  translate([0, 0, -screw_nut_height - object_clearance - plate_thickness/2 
-    - bearing_large[h_pos] - pressfit_clearance - plane_thickness]) plate();
+  translate([0, 0, -screw_nut_height - object_clearance - plate_thickness 
+    - bearing_large[h_pos] - pressfit_clearance - plane_thickness]) front_plate();
 }
 
 
@@ -129,14 +130,30 @@ module shoulder_module_side(dir=1) {
     
     // stepper plate
     translate([0, 0, -offset]) stepper_plate();
+    
+    // wall mounting bracket
+    translate([0, -pinion_offset, -offset - spur_teeth_width - 2 * object_clearance - plane_thickness/2]) 
+      mounting_bracket_side();
   }
   
   // side plate
   translate([0, 0, -plate_thickness - object_clearance]) side_plate();
+  
+  bracket_offset = get_pinion_radius(shoulder_modulus, shoulder_teeth, shoulder_teeth) 
+    + screw_nut_height + plane_thickness + bearing_large[h_pos] + object_clearance;
+  
+  // plate mounting bracket
+  translate([0, bracket_offset, -object_clearance]) rotate([0, 90, 270]) inner_bracket();
+  translate([-plate_width/2, bracket_offset + plate_thickness, -object_clearance - plate_thickness]) 
+    rotate([90, 0, 90]) outer_bracket();
 }
 
 
 module shoulder_module() {
+  clearance = 10;
+  stepper_offset = shoulder_modulus * (spur_pinion_teeth + spur_wheel_teeth)/2;
+  plate_offset = stepper_offset + sqrt(2) * get_hole_distance()/2 + clearance;
+  
   if (assembled) {
     rotate([0, elbow_angle, 0]) translate([-upper_arm_length + shoulder_wheel_radius, 0, 0]) 
       rotate([0, 270, 0]) {
@@ -150,6 +167,17 @@ module shoulder_module() {
         translate([0, -get_wheel_radius(shoulder_modulus, shoulder_teeth, shoulder_teeth), 
           get_wheel_radius(shoulder_modulus, shoulder_teeth, shoulder_teeth)]) 
             rotate([270, 0, 0]) shoulder_module_side(-1);
+        
+        // wall mounting
+        translate([0, 0, get_pinion_radius(shoulder_modulus, shoulder_teeth, shoulder_teeth)]) 
+          rotate([0, -shoulder_angle, 0]) {
+            // wall mounting plate
+            translate([0, 0, plate_offset]) mounting_plate();
+          
+            // wall mounting bracket
+            translate([0, -bracket_width/2, stepper_offset]) rotate([270, 0, 0]) mounting_bracket_middle();
+          }
+        
     }
   }
   else {
@@ -169,7 +197,7 @@ module shoulder_module() {
     translate(coupler_pos) coupler();
     
     // plate
-    translate(plate_pos) plate();
+    translate(plate_pos) front_plate();
   }
 }
 
@@ -255,6 +283,13 @@ module main() {
     if (show_all) {
       for (i = [0 : total_nuts - 1]) {
         translate(nut_pos(i)) stainless() nut(thread_name);
+      }
+      for (i = [0 : total_screws - 1]) {
+        translate(screw_nut_pos(i)) stainless() nut(screw_type);
+      }
+      for (i = [0 : total_screws - 1]) {
+        translate(screw_pos(i, (i < total_long_screws) ? 50 : screw_length)) 
+          rotate([90, 0, 0]) stainless() screw((i < total_long_screws) ? screw_name_long : screw_name);
       }
       for (i = [0 : total_bearings - 1]) steel() {
         translate(bearing_pos(i)) bearing(bearing_small);

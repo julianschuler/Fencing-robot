@@ -202,9 +202,8 @@ module shoulder_pinion(bearing_type=bearing_medium) {
   id = bearing_type[od_pos]/2 + bearing_type[id_pos]/2 - object_clearance;
   offset = bearing_type[h_pos] - object_clearance;
   screw_offset = bearing_type[id_pos]/2 - screw_diameter/2 - wall_thickness;
-  screw_length = 60;
   nut_offset = 2 * plate_thickness + 3 * object_clearance + screw_head_height + spur_teeth_width - 
-    screw_length;
+    screw_length_long;
   
   difference () {
     union() {
@@ -229,7 +228,7 @@ module shoulder_pinion(bearing_type=bearing_medium) {
   if (assembled) {
     for (i = [0 : axle_holes]) stainless() {
       rotate([0, 0, i * 360/axle_holes]) {
-        translate([screw_offset, 0, -nut_offset - screw_length]) rotate([0, 180, 0]) screw("M5x50");
+        translate([screw_offset, 0, -nut_offset - screw_length_long]) rotate([0, 180, 0]) screw(screw_name_long);
         translate([screw_offset, 0, -nut_offset]) rotate([0, 0, 90]) nut(screw_type);
       }
     }
@@ -238,8 +237,6 @@ module shoulder_pinion(bearing_type=bearing_medium) {
 
 
 module shoulder_spur_wheel(bearing_type=bearing_medium) {
-  _screw_type = "M5x50";
-  
   height = bearing_type[h_pos] + plane_thickness + screw_nut_height;
   id = bearing_type[od_pos]/2 + bearing_type[id_pos]/2 - object_clearance;
   od = bearing_type[od_pos] + 2 * wall_thickness + screw_diameter + screw_head_diameter 
@@ -269,64 +266,44 @@ module shoulder_spur_pinion() {
 }
 
 
-
-module coupler() {
-  steel() ring(od=coupler_diameter, id=thread_diameter, h=coupler_height);
-}
-
-
-
-module plate(bearing_type = bearing_large) {;
-  steel() difference() {
-    cube([100, 100, plate_thickness], center=true);
-    cylinder(h=plate_thickness + 2 * e, d=bearing_type[od_pos]/2 
-      + bearing_type[id_pos]/2 + object_clearance, center=true);
-    for (i = [0 : bearing_holes - 1]) {
-      rotate([0, 0, i * 360/bearing_holes]) {
-        translate([bearing_type[od_pos]/2 + screw_diameter/2 + wall_thickness, 0, 0]) 
-          cylinder(h=plate_thickness + 2 * e, d=screw_diameter, center=true);
-      }
-    }
-  }
-}
-
-
-module stepper_plate(bearing_type = bearing_medium) {;
-  plate_clearance = 10;
-  plate_width = 100;
-  stepper_offset = shoulder_modulus * (spur_wheel_teeth + spur_pinion_teeth)/2;
-  hole_offset = sqrt(2) * get_hole_distance()/2;
-  plate_length = stepper_offset + hole_offset + plate_clearance;
-  id = bearing_type[od_pos]/2 + bearing_type[id_pos]/2 + object_clearance;
+module inner_bracket() {
+  width = screw_length - plate_thickness - wall_thickness;
+  height = bearing_large[h_pos] + plane_thickness + screw_nut_height;
+  length = plate_width;
+  screw_offset = width/3;
+  screw_offset_side = height/2;
+  orientation = 0;
   
-  steel() difference() {
-    union() {       
-      cylinder(h=plate_thickness, d=plate_width);
-      translate([-plate_width/2, -plate_length, 0]) cube([plate_width, plate_length, plate_thickness]);
-    }
-    translate([0, 0, -e]) cylinder(h=plate_thickness + 2 * e, d=id);
-    for (i = [0 : bearing_holes - 1]) {
-      rotate([0, 0, i * 360/bearing_holes]) {
-        translate([bearing_type[od_pos]/2 + screw_diameter/2 + wall_thickness, 0, -e]) 
-          cylinder(h=plate_thickness + 2 * e, d=screw_diameter);
-      }
-    }
-    translate([0, -stepper_offset, -e]) {
-      cylinder(h=plate_thickness + 2 * e, d=stepper_diameter);
-      for (i = [0 : stepper_holes - 2]) {
-        rotate([0, 0, i * 360/stepper_holes]) translate([-hole_offset, 0, 0]) 
-          cylinder(h=plate_thickness + 2 * e, d=screw_diameter);
+  translate([-width, -length/2, 0]) difference() {
+    cube([width, length, height]);
+    for (i = [0 : bracket_holes - 1]) {
+      translate([0, i * length/bracket_holes + length/(2 * bracket_holes), 0]) {
+        if (i % 2 == orientation) {
+          translate([width - screw_offset, 0, -e]) cylinder(h=height + 2 * e, d=screw_diameter);
+          translate([width - screw_offset, 0, height + e]) rotate([0, 0, 90])
+            nutcatch_parallel(screw_type, l=screw_nut_height + e, clk=sliding_clearance);
+        }
+        else {
+          translate([-e, 0, screw_offset_side]) rotate ([0, 90, 0]) 
+            cylinder(h=width + 2 * e, d=screw_diameter);
+          translate([-e, 0, screw_offset_side]) rotate ([0, 90, 180]) rotate([0, 0, 90])
+            nutcatch_parallel(screw_type, l=screw_nut_height + e, clk=sliding_clearance);
+        }
       }
     }
   }
   
-  if (assembled) {
-    translate([0, -stepper_offset, plate_thickness]) {
-      rotate([0, 0, 45]) stepper();
-      for (i = [0 : stepper_holes - 2]) stainless() {
-        rotate([0, 0, i * 360/stepper_holes]) {
-          translate([-hole_offset, 0, stepper_plate_thickness]) screw(screw_name);
-          translate([-hole_offset, 0, -plate_thickness]) nut(screw_type);
+  // screws and nuts
+  if (assembled) stainless() {
+    for (i = [0 : bracket_holes - 1]) {
+      translate([0, i * length/bracket_holes + length/(2 * bracket_holes) - length/2, 0]) {
+        if (i % 2 == bracket_orientation) {
+          translate([-screw_offset, 0, height]) rotate([0, 0, 90]) nut(screw_type);
+          translate([-screw_offset, 0, height - screw_length]) rotate([180, 0, 0]) screw(screw_name);
+        }
+        else {
+          translate([-width, 0, height/2]) rotate ([0, 270, 0]) rotate([0, 0, 90]) nut(screw_type);
+          translate([screw_length - width, 0, height/2]) rotate([0, 90, 0]) screw(screw_name);
         }
       }
     }
@@ -334,23 +311,133 @@ module stepper_plate(bearing_type = bearing_medium) {;
 }
 
 
-module side_plate(bearing_type=bearing_medium) {
-  plate_width = 100;
-  plate_length = get_pinion_radius(shoulder_modulus, shoulder_teeth, shoulder_teeth);
-  bearing_type = bearing_medium;
-  id = bearing_type[od_pos]/2 + bearing_type[id_pos]/2 + object_clearance;
+module outer_bracket() {
+  length = screw_length - wall_thickness;
+  width = screw_length - bearing_large[h_pos] - plane_thickness - screw_nut_height - plate_thickness;
+  height = plate_width;
+  lid_length = width + bearing_large[h_pos] + plane_thickness + screw_nut_height + plate_thickness;
+  screw_offset = plate_thickness + (bearing_large[h_pos] + plane_thickness + screw_nut_height)/2;
+  screw_offset_side = plate_thickness + (screw_length - plate_thickness - wall_thickness)/3;
   
-  steel() difference() {
-    union() {       
-      cylinder(h=plate_thickness, d=plate_width);
-      translate([-plate_width/2, 0, 0]) cube([plate_width, plate_length, plate_thickness]);
+  difference() {
+    union() {
+      cube([width, length, height]);
+      translate([-plate_thickness, 0, 0]) cube([plate_thickness, plate_thickness, height]);
+      translate([-lid_length + width, -wall_thickness, 0]) cube([lid_length, wall_thickness, height]);
     }
-    translate([0, 0, -e]) cylinder(h=plate_thickness + 2 * e, d=id);
-    for (i = [0 : bearing_holes - 1]) {
-      rotate([0, 0, i * 360/bearing_holes]) {
-        translate([bearing_type[od_pos]/2 + screw_diameter/2 + wall_thickness, 0, -e]) 
-          cylinder(h=plate_thickness + 2 * e, d=screw_diameter);
+    // chamfer
+    translate([width - chamfer_depth, -wall_thickness, -e]) rotate([0, 0, -45]) 
+      cube([chamfer_depth * sqrt(2), chamfer_depth * sqrt(2), height + 2 * e]);
+    // mounting holes
+    for (i = [0 : bracket_holes - 1]) {
+      translate([0, 0, i * height/bracket_holes + height/(2 * bracket_holes)]) {
+        if (i % 2 == bracket_orientation) {
+          translate([-e, screw_offset_side, 0]) rotate([0, 90, 0]) 
+            cylinder(h=width + 2 * e, d=screw_diameter);
+        }
+        else {
+          translate([-screw_offset, e, 0]) rotate([90, 0, 0]) 
+            cylinder(h=wall_thickness + 2 * e, d=screw_diameter);
+        }
       }
     }
   }
+}
+
+
+module mounting_bracket_side() {
+  gear_clearance = 4;
+  height = spur_teeth_width + 2 * object_clearance;
+  width = plate_width;
+  length = width;
+  hole_offset = sqrt(2) * get_hole_distance()/2;
+  offset = hole_offset + plate_clearance;
+  pinion_diameter = shoulder_modulus * spur_pinion_teeth;
+  wheel_diameter = shoulder_modulus * spur_wheel_teeth;
+  lid_thickness = plane_thickness/2;
+  slot_height = height + lid_thickness + plate_thickness + stepper_plate_thickness + screw_nut_height
+    - screw_length;
+  screw_offset = spur_teeth_width/2 + object_clearance + lid_thickness;
+  nut_offset = screw_length - plate_thickness;
+  
+  difference() {
+    translate([-length/2, -offset, 0]) cube([width, length, height + lid_thickness]);
+    translate([0, 0, lid_thickness]) cylinder(h=height + 2 * e, d=pinion_diameter + 2 * gear_clearance);
+    translate([0, pinion_diameter/2 + wheel_diameter/2, lid_thickness]) 
+      cylinder(h=height + 2 * e, d=wheel_diameter + 2 * gear_clearance);
+    translate([0, pinion_diameter/2 + wheel_diameter/2, -e]) 
+      cylinder(h=lid_thickness + 2 * e, d=wheel_diameter - 2 * gear_clearance);
+    
+    for (i = [0 : stepper_holes - 2]) {
+      rotate([0, 0, i * 360/stepper_holes]) {
+        translate([-hole_offset, 0, -e]) cylinder(h=plate_thickness + 2 * e, d=screw_diameter);
+        translate([-hole_offset, 0, -e]) rotate([0, 0, 90])
+          nutcatch_overhang(screw_type, screw_diameter, slot_height + e);
+      }
+    }
+    
+    // screw holes and nutcaches
+    for (i = [1 : outer_screws/2]) {
+      translate([i * plate_width/(outer_screws + 1), -offset + nut_offset, screw_offset]) {
+        rotate([0, 0, 270]) cylinder_overhang(h=nut_offset + e, d=screw_diameter);
+        rotate([270, 90, 0]) nutcatch_sidecut(screw_type, l=screw_offset + e, clk=sliding_clearance, 
+          clh=sliding_clearance, clsl=sliding_clearance);
+      }
+      translate([i * -plate_width/(outer_screws + 1), -offset + nut_offset, screw_offset]) {
+        rotate([0, 0, 270]) cylinder_overhang(h=nut_offset + e, d=screw_diameter);
+        rotate([270, 90, 0]) nutcatch_sidecut(screw_type, l=screw_offset + e, clk=sliding_clearance, 
+          clh=sliding_clearance, clsl=sliding_clearance);
+      }
+    }
+  }
+}
+
+
+module mounting_bracket_middle() {
+  cable_diameter = 7;
+  stepper_width = 65;
+  height = bracket_width;
+  width = plate_width;
+  hole_offset = sqrt(2) * get_hole_distance()/2;
+  offset = hole_offset + plate_clearance;
+  bracket_thickness = (width/sqrt(2) - stepper_size)/2;
+  nut_offset = screw_length - plate_thickness;
+  
+  difference() {
+    union() {
+      intersection() {
+        translate([0, -width/2, 0]) rotate([0, 0, 45]) cube([width/sqrt(2), width/sqrt(2), height]);
+        translate([-width/2, -offset, 0]) 
+          cube([width, offset + stepper_width/2 + bracket_thickness, height]);
+      }
+      translate([-width/2, -offset, 0]) cube([width, offset, height]);
+    }
+    intersection() {
+      translate([0, -sqrt(2) * stepper_size/2, -e]) rotate([0, 0, 45]) 
+        cube([stepper_size, stepper_size, height + 2 * e]);
+      translate([-stepper_width/2, -stepper_width/2, -e]) 
+        cube([stepper_width, stepper_width, height + 2 * e]);
+    }
+    translate([-stepper_size/(2 * sqrt(2)), -stepper_size/(2 * sqrt(2)), -e]) 
+      cylinder(h=height + 2 * e, d=cable_diameter);
+    
+    // screw holes and nutcaches
+    for (i = [1 : inner_screws/2]) {
+      translate([i * plate_width/(inner_screws + 1), -offset + nut_offset, height/2]) {
+        rotate([0, 0, 270]) cylinder_overhang(h=nut_offset + e, d=screw_diameter);
+        rotate([270, 270, 0]) nutcatch_sidecut(screw_type, l=height/2 + e, clk=sliding_clearance, 
+          clh=sliding_clearance, clsl=sliding_clearance);
+      }
+      translate([i * -plate_width/(inner_screws + 1), -offset + nut_offset, height/2]) {
+        rotate([0, 0, 270]) cylinder_overhang(h=nut_offset + e, d=screw_diameter);
+        rotate([270, 270, 0]) nutcatch_sidecut(screw_type, l=height/2 + e, clk=sliding_clearance, 
+          clh=sliding_clearance, clsl=sliding_clearance);
+      }
+    }
+  }
+}
+
+
+module coupler() {
+  steel() ring(od=coupler_diameter, id=thread_diameter, h=coupler_height);
 }
