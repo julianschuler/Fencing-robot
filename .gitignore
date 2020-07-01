@@ -56,3 +56,6 @@ dkms.conf
 *.sizeok
 
 parts/AMF
+parts/3MF
+parts/DXF
+code
