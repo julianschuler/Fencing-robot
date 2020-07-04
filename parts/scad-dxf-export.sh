@@ -4,6 +4,7 @@
 # defaults
 EXPORT_PATH="DXF"
 EXPORT_EXT="dxf"
+FN="120"
 
 PART_NAME_FILE="scad-plate-names.conf"
 INCLUDE_PATH="scad"
@@ -39,7 +40,7 @@ print_error() {
 render_and_export() {
 	local start=$SECONDS
 	echo "Rendering part $1..."
-	if openscad -q -o $export_path/$1.$export_ext <(echo "$includes projection() $1();"); then
+	if openscad -q -o $export_path/$1.$export_ext <(echo "$includes \$fn=$FN; projection() $1();"); then
 		local d=$(($SECONDS - $start))
 		echo "Finished in $(($d/3600)) hours, $((($d/60) % 60)) minutes, $(($d % 60)) seconds."
 		echo "Part exported to $export_path/$1.$export_ext."
