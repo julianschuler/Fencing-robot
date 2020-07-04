@@ -4,7 +4,7 @@ use <stepper.scad>
 
 
 module front_plate(bearing_type=bearing_large) {
-  plate_length = 2 * (get_wheel_radius(shoulder_modulus, shoulder_teeth, shoulder_teeth) + object_clearance);
+  plate_length = 2 * shoulder_gear_radius + 2 * object_clearance;
   screw_offset = (screw_length - plate_thickness - wall_thickness)/3;
   
   steel() difference() {
@@ -33,7 +33,7 @@ module front_plate(bearing_type=bearing_large) {
 
 module stepper_plate(bearing_type = bearing_medium) {;
   plate_clearance = 10;
-  stepper_offset = shoulder_modulus * (spur_wheel_teeth + spur_pinion_teeth)/2;
+  stepper_offset = spur_pinion_radius + spur_wheel_radius;
   hole_offset = sqrt(2) * get_hole_distance()/2;
   plate_length = stepper_offset + hole_offset + plate_clearance;
   id = bearing_type[od_pos]/2 + bearing_type[id_pos]/2 + object_clearance;
@@ -76,8 +76,7 @@ module stepper_plate(bearing_type = bearing_medium) {;
 
 module side_plate(bearing_type=bearing_medium) {
   plate_offset = screw_nut_height + bearing_large[h_pos] + pressfit_clearance + plane_thickness;
-  plate_length = get_pinion_radius(shoulder_modulus, shoulder_teeth, shoulder_teeth)
-    + object_clearance + plate_offset;
+  plate_length = shoulder_gear_radius + object_clearance + plate_offset;
   bearing_type = bearing_medium;
   id = bearing_type[od_pos]/2 + bearing_type[id_pos]/2 + object_clearance;
   hole_offset = bearing_type[od_pos]/2 + screw_diameter/2 + wall_thickness + screw_head_diameter
@@ -111,9 +110,8 @@ module side_plate(bearing_type=bearing_medium) {
 
 module mounting_plate() {
   lid_thickness = plane_thickness/2;
-  wheel_radius = get_wheel_radius(shoulder_modulus, shoulder_teeth, shoulder_teeth);
-  length = 2 * (wheel_radius + 2 * plate_thickness + 4 * object_clearance + screw_head_height 
-    + lid_thickness + spur_teeth_width);
+  length = 2 * (stepper_plate_offset + plate_thickness + lid_thickness + spur_teeth_width 
+    + 2 * object_clearance);
   width = plate_width;
   outer_screw_offset = length/2 - lid_thickness - object_clearance - spur_teeth_width/2;
   

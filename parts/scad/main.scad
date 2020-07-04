@@ -12,10 +12,10 @@ use <utility.scad>
  *******************************************************************************/
  
 module threaded_rods() {
-  outer_rod_length = upper_arm_length - shoulder_wheel_radius - 2 * object_clearance 
+  outer_rod_length = upper_arm_length - shoulder_gear_radius - 2 * object_clearance 
     - plane_thickness - plate_thickness - upper_arm_rod_offset - screw_nut_height 
     - bearing_large[h_pos] - screw_head_height;
-  inner_rod_length = upper_arm_length - shoulder_wheel_radius + stepper_offset - get_axle_length()
+  inner_rod_length = upper_arm_length - shoulder_gear_radius + stepper_offset - get_axle_length()
     - wheel_radius + teeth_width;
   elbow_rod_length = 2 * pinion_radius + nut_diameter + 2 * wall_thickness + bearing_small[h_pos] 
     + 2 * nut_height + 2 * spacer_thickness + 2 * object_clearance;
@@ -39,8 +39,7 @@ module threaded_rods() {
       translate([-bearing_small[od_pos]/2 - wall_thickness, -upper_arm_rod_offset, 0]) 
         rotate([0, 270, 0]) cylinder(h=outer_rod_length, d=thread_diameter);
     }
-  
-  
+    
     // elbow joint
     translate ([0, elbow_rod_length/2, 0]) rotate([90, 0, 0]) 
       cylinder(h=elbow_rod_length, d=thread_diameter);
@@ -102,9 +101,9 @@ module shoulder_module_joint() {
 
 module shoulder_module_side(dir=1) {
   bearing_holder_height = screw_nut_height + plane_thickness + bearing_medium[h_pos];
-  offset = 2 * plate_thickness + screw_head_height + 2 * object_clearance;
-  pinion_offset = shoulder_modulus * (spur_wheel_teeth + spur_pinion_teeth) / 2;
-  clamp_offset = 3 * object_clearance/2 + plate_thickness + screw_head_height/2;
+  offset = stepper_plate_offset - shoulder_gear_radius + plate_thickness;
+  pinion_offset = spur_pinion_radius + spur_wheel_radius;
+  clamp_offset = offset/2 + object_clearance/2;
   
   // bevel gear pinion
   shoulder_pinion();
@@ -117,13 +116,13 @@ module shoulder_module_side(dir=1) {
   translate([0, 0, -clamp_offset]) bearing_clamp_halve();
   translate([0, 0, -clamp_offset]) rotate([180, 0, 180]) bearing_clamp_halve();
   
-  // bearing holder
-  translate([0, 0, -offset - bearing_holder_height]) bearing_holder();
-  
   // shoulder spur wheel
   translate([0, 0, -offset - object_clearance - spur_teeth_width]) shoulder_spur_wheel();
   
   rotate([0, 0, dir * shoulder_angle]) {
+    // bearing holder
+    translate([0, 0, -offset - bearing_holder_height]) bearing_holder();
+
     // shoulder spur pinion
     translate([0, -pinion_offset, -spur_teeth_width - offset - object_clearance]) 
       rotate([0, 0, dir * shoulder_angle * spur_wheel_teeth/spur_pinion_teeth]) shoulder_spur_pinion();
@@ -139,8 +138,8 @@ module shoulder_module_side(dir=1) {
   // side plate
   translate([0, 0, -plate_thickness - object_clearance]) side_plate();
   
-  bracket_offset = get_pinion_radius(shoulder_modulus, shoulder_teeth, shoulder_teeth) 
-    + screw_nut_height + plane_thickness + bearing_large[h_pos] + object_clearance;
+  bracket_offset = shoulder_gear_radius + screw_nut_height + plane_thickness + bearing_large[h_pos] 
+    + object_clearance;
   
   // plate mounting bracket
   translate([0, bracket_offset, -object_clearance]) rotate([0, 90, 270]) inner_bracket();
@@ -155,21 +154,19 @@ module shoulder_module() {
   plate_offset = stepper_offset + sqrt(2) * get_hole_distance()/2 + clearance;
   
   if (assembled) {
-    rotate([0, elbow_angle, 0]) translate([-upper_arm_length + shoulder_wheel_radius, 0, 0]) 
+    rotate([0, elbow_angle, 0]) translate([-upper_arm_length + shoulder_gear_radius, 0, 0]) 
       rotate([0, 270, 0]) {
         // shoulder joint
         shoulder_module_joint();
         
         // sides
-        translate([0, get_wheel_radius(shoulder_modulus, shoulder_teeth, shoulder_teeth), 
-          get_wheel_radius(shoulder_modulus, shoulder_teeth, shoulder_teeth)]) 
-            rotate([90, 180, 0]) shoulder_module_side(1);
-        translate([0, -get_wheel_radius(shoulder_modulus, shoulder_teeth, shoulder_teeth), 
-          get_wheel_radius(shoulder_modulus, shoulder_teeth, shoulder_teeth)]) 
-            rotate([270, 0, 0]) shoulder_module_side(-1);
+        translate([0, shoulder_gear_radius, shoulder_gear_radius]) rotate([90, 180, 0]) 
+          shoulder_module_side(1);
+        translate([0, -shoulder_gear_radius, shoulder_gear_radius]) rotate([270, 0, 0]) 
+          shoulder_module_side(-1);
         
         // wall mounting
-        translate([0, 0, get_pinion_radius(shoulder_modulus, shoulder_teeth, shoulder_teeth)]) 
+        translate([0, 0, shoulder_gear_radius]) 
           rotate([0, -shoulder_angle, 0]) {
             // wall mounting plate
             translate([0, 0, plate_offset]) mounting_plate();

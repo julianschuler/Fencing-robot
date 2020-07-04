@@ -1,12 +1,9 @@
 include <settings.scad>
 use <utility.scad>
-use <stepper.scad>
 
 
 
 module shoulder_wheel() {
-  hole_offset = get_hole_distance() / 2;
-  
   difference () {
     bevel_gear_wheel(shoulder_modulus, shoulder_teeth, shoulder_teeth, shoulder_teeth_width, 0, 
       helix_angle=helix_angle);
@@ -19,7 +16,7 @@ module shoulder_wheel() {
     
     // stepper mounting holes
     for (i = [0 : stepper_holes - 1]) {
-      rotate([0, 0, i * 360/stepper_holes]) translate([hole_offset, hole_offset, -e]) {
+      rotate([0, 0, i * 360/stepper_holes]) translate([stepper_hole_offset, stepper_hole_offset, -e]) {
         cylinder(h=stepper_offset + 2 * e, d=screw_diameter);
         rotate([0, 0, 135]) nutcatch_overhang(screw_type, screw_diameter, screw_nut_height);
       }
@@ -38,7 +35,7 @@ module shoulder_wheel() {
   if (assembled) {
     // stepper mounting
     for (i = [0 : stepper_holes - 1]) {
-      rotate([0, 0, i * 360/stepper_holes]) translate([hole_offset, hole_offset, 0]) {
+      rotate([0, 0, i * 360/stepper_holes]) translate([stepper_hole_offset, stepper_hole_offset, 0]) {
         rotate([0, 0, 135]) {
           translate([0, 0, stepper_offset + 5]) stainless() screw(screw_name);
           translate([0, 0, screw_nut_height]) stainless() nut(screw_type);
@@ -57,8 +54,6 @@ module shoulder_wheel() {
 
 
 module shoulder_connector(height = 15) {
-  _screw_name = "M5x50";
-  
   shoulder_teeth_width = nut_diameter + 2 * wall_thickness;
   length = 2 * upper_arm_rod_offset;
   total_height = height + nut_height + spacer_thickness + plate_thickness + screw_head_height
@@ -102,7 +97,7 @@ module shoulder_connector(height = 15) {
       for (i = [0 : axle_holes - 1]) {
         rotate([0, 180, i * 360/axle_holes])
           translate([bearing_large[id_pos]/4 + coupler_diameter/4 + object_clearance/2 
-            - pressfit_clearance, 0, 0]) screw(_screw_name);
+            - pressfit_clearance, 0, 0]) screw(screw_name_long);
       }
     }
   }
@@ -176,7 +171,7 @@ module bearing_clamp_large(bearing_type=bearing_large) {
 
 
 module bearing_clamp_halve(bearing_type=bearing_medium) {
-  height = 3 * object_clearance/2 + plate_thickness + screw_head_height/2;
+  height = (stepper_plate_offset - shoulder_gear_radius + plate_thickness + object_clearance)/2;
   screw_offset = bearing_type[id_pos]/2 - screw_diameter/2 - wall_thickness;
   id = bearing_type[od_pos]/2 + bearing_type[id_pos]/2 - object_clearance;
   
@@ -202,8 +197,8 @@ module shoulder_pinion(bearing_type=bearing_medium) {
   id = bearing_type[od_pos]/2 + bearing_type[id_pos]/2 - object_clearance;
   offset = bearing_type[h_pos] - object_clearance;
   screw_offset = bearing_type[id_pos]/2 - screw_diameter/2 - wall_thickness;
-  nut_offset = 2 * plate_thickness + 3 * object_clearance + screw_head_height + spur_teeth_width - 
-    screw_length_long;
+  nut_offset = stepper_plate_offset - shoulder_gear_radius + plate_thickness + object_clearance 
+    + spur_teeth_width - screw_length_long;
   
   difference () {
     union() {
@@ -228,7 +223,8 @@ module shoulder_pinion(bearing_type=bearing_medium) {
   if (assembled) {
     for (i = [0 : axle_holes]) stainless() {
       rotate([0, 0, i * 360/axle_holes]) {
-        translate([screw_offset, 0, -nut_offset - screw_length_long]) rotate([0, 180, 0]) screw(screw_name_long);
+        translate([screw_offset, 0, -nut_offset - screw_length_long]) rotate([0, 180, 0]) 
+          screw(screw_name_long);
         translate([screw_offset, 0, -nut_offset]) rotate([0, 0, 90]) nut(screw_type);
       }
     }
@@ -346,14 +342,10 @@ module outer_bracket() {
 
 
 module mounting_bracket_side() {
-  gear_clearance = 4;
   height = spur_teeth_width + 2 * object_clearance;
   width = plate_width;
   length = width;
-  hole_offset = sqrt(2) * get_hole_distance()/2;
-  offset = hole_offset + plate_clearance;
-  pinion_diameter = shoulder_modulus * spur_pinion_teeth;
-  wheel_diameter = shoulder_modulus * spur_wheel_teeth;
+  offset = stepper_hole_offset * sqrt(2) + plate_clearance;
   lid_thickness = plane_thickness/2;
   slot_height = height + lid_thickness + plate_thickness + stepper_plate_thickness + screw_nut_height
     - screw_length;
@@ -362,16 +354,16 @@ module mounting_bracket_side() {
   
   difference() {
     translate([-length/2, -offset, 0]) cube([width, length, height + lid_thickness]);
-    translate([0, 0, lid_thickness]) cylinder(h=height + 2 * e, d=pinion_diameter + 2 * gear_clearance);
-    translate([0, pinion_diameter/2 + wheel_diameter/2, lid_thickness]) 
-      cylinder(h=height + 2 * e, d=wheel_diameter + 2 * gear_clearance);
-    translate([0, pinion_diameter/2 + wheel_diameter/2, -e]) 
-      cylinder(h=lid_thickness + 2 * e, d=wheel_diameter - 2 * gear_clearance);
+    translate([0, 0, lid_thickness]) cylinder(h=height + 2 * e, r=spur_pinion_radius + gear_clearance);
+    translate([0, spur_pinion_radius + spur_wheel_radius, lid_thickness]) 
+      cylinder(h=height + 2 * e, r=spur_wheel_radius + gear_clearance);
+    translate([0, spur_pinion_radius + spur_wheel_radius, -e]) 
+      cylinder(h=lid_thickness + 2 * e, r=spur_wheel_radius - gear_clearance);
     
     for (i = [0 : stepper_holes - 2]) {
       rotate([0, 0, i * 360/stepper_holes]) {
-        translate([-hole_offset, 0, -e]) cylinder(h=plate_thickness + 2 * e, d=screw_diameter);
-        translate([-hole_offset, 0, -e]) rotate([0, 0, 90])
+        translate([-stepper_hole_offset * sqrt(2), 0, -e]) cylinder(h=plate_thickness + 2 * e, d=screw_diameter);
+        translate([-stepper_hole_offset * sqrt(2), 0, -e]) rotate([0, 0, 90])
           nutcatch_overhang(screw_type, screw_diameter, slot_height + e);
       }
     }
@@ -398,8 +390,7 @@ module mounting_bracket_middle() {
   stepper_width = 65;
   height = bracket_width;
   width = plate_width;
-  hole_offset = sqrt(2) * get_hole_distance()/2;
-  offset = hole_offset + plate_clearance;
+  offset = stepper_hole_offset * sqrt(2) + plate_clearance;
   bracket_thickness = (width/sqrt(2) - stepper_size)/2;
   nut_offset = screw_length - plate_thickness;
   

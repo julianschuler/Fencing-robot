@@ -22,7 +22,7 @@ shoulder_angle = 80;
 upper_arm_length = 350;
 forearm_length = 400;
 thread_name = "M8";
-thread_diameter = 8;
+thread_diameter = 8.2;
 nut_height = 6.8;
 nut_diameter = 13;
 wall_thickness = 2.5;
@@ -32,7 +32,7 @@ plane_thickness = 2;
 screw_type = "M5";
 screw_name = "M5x25";
 screw_name_long = "M5x50";
-screw_diameter = 5;
+screw_diameter = 5.2;
 screw_length = 25;
 screw_length_long = 60;
 screw_head_height = 5;
@@ -64,7 +64,7 @@ shoulder_teeth_width = 40;
 spur_pinion_teeth = 20;
 spur_wheel_teeth = 90;
 spur_teeth_width = 20;
-plate_thickness = 6;
+plate_thickness = 3;
 plate_width = 100;
 coupler_diameter = 20;
 coupler_height = 25;
@@ -77,6 +77,7 @@ bracket_holes = 7;
 bracket_width = 20;
 chamfer_depth = 7;
 plate_clearance = 10;
+gear_clearance = 4;
 outer_screws = 4;
 inner_screws = 4;
 
@@ -118,6 +119,7 @@ h_pos = 2;
  *                               DERIVED VALUES                                *
  *******************************************************************************/
 
+// general values
 show_all = $preview;
 assembled = $preview ? previewAssembly : false;
 
@@ -127,22 +129,31 @@ total_screws = total_short_screws + total_long_screws;
 screw_spacing = max(screw_head_diameter/cos(30) + part_distance, screw_head_diameter + part_distance);
 screw_clearance = max(screw_nut_diameter/(2 * cos(30)), screw_head_diameter/2);
 
+// stepper values
 stepper_size = get_side_size() + 2 * pressfit_clearance;
+stepper_length = get_length();
 stepper_holes = get_hole_count();
+stepper_hole_offset = get_hole_distance()/2;
 stepper_offset = screw_length - get_plate_thickness();
 stepper_thickness = get_extrusion_thickness();
 stepper_diameter = get_extrusion_diameter();
 stepper_plate_thickness = get_plate_thickness() - get_extrusion_thickness();
 
+// gear values
 wheel_radius = get_wheel_radius(modulus, teeth_pinion, teeth_wheel);
 pinion_radius = get_pinion_radius(modulus, teeth_pinion, teeth_wheel);
+shoulder_gear_radius = get_wheel_radius(shoulder_modulus, shoulder_teeth, shoulder_teeth);
+spur_pinion_radius = shoulder_modulus * spur_pinion_teeth/2;
+spur_wheel_radius = shoulder_modulus * spur_wheel_teeth/2;
 
-shoulder_wheel_radius = get_wheel_radius(shoulder_modulus, shoulder_teeth, shoulder_teeth);
-
+// offsets
 upper_arm_rod_offset = pinion_radius + nut_diameter/2 + wall_thickness + object_clearance;
 rod_offset = max(thread_diameter/2 + wall_thickness, nut_diameter/(2 * cos(30)));
+stepper_plate_offset = max(stepper_length, shoulder_gear_radius + plate_thickness + screw_head_height
+  + 2 * object_clearance);
 
 
+// positions for the disassembled view
 pinion_pos = [294, wheel_radius + part_distance + spacer_diameter/2, 0];
 wheel_pos = pinion_pos + [wheel_radius + pinion_radius + part_distance, 0, 0];
 hand_pos = wheel_pos + [wheel_radius + part_distance + thread_diameter/2 + wall_thickness, 0, 0];
@@ -161,7 +172,7 @@ bearing_holder_pos = bearing_clamp_pos - [3 * bearing_large[od_pos]/4
                     + bearing_large[id_pos]/4 + 2 * wall_thickness 
                     + screw_diameter + part_distance, 0, 0];
 
-shoulder_wheel_pos = bearing_holder_pos -[shoulder_wheel_radius + bearing_large[od_pos]/2 
+shoulder_wheel_pos = bearing_holder_pos -[shoulder_gear_radius + bearing_large[od_pos]/2 
                     + 2 * wall_thickness + screw_diameter + part_distance, 0, 0];
 
 coupler_pos = [coupler_diameter/2, bearing_pos(0)[1], 0];
@@ -179,8 +190,6 @@ guard_pos = [get_guard_diameter()/2, blade_pos[1] - part_distance - get_blade_wi
 
 special_spacers = [nut_diameter/2 + wall_thickness - bearing_small[h_pos]/2 + object_clearance,
                 nut_diameter/2 + wall_thickness - bearing_small[h_pos]/2 + object_clearance];
-
-
 
 function spacer_pos(i) = [spacer_diameter/2 + i * (spacer_diameter + part_distance), 0, 0];
 
