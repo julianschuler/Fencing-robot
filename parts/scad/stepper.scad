@@ -19,7 +19,7 @@ Nema23Custom = [
     [NemaAxleDiameter, 8*mm], 
     [NemaFrontAxleLength, 18.80*mm], 
     [NemaBackAxleLength, 15.60*mm],
-    [NemaAxleFlatDepth, 1*mm],
+    [NemaAxleFlatDepth, 0.5*mm],
     [NemaAxleFlatLengthFront, 16*mm],
     [NemaAxleFlatLengthBack, 14*mm]
 ];
@@ -33,6 +33,8 @@ function get_plate_thickness() = lookup(NemaMountingHoleLip, Nema23Custom);
 function get_extrusion_diameter() = lookup(NemaRoundExtrusionDiameter, Nema23Custom);
 function get_extrusion_thickness() = lookup(NemaRoundExtrusionHeight, Nema23Custom);
 function get_length() = lookup(NemaLengthLong, Nema23Custom);
+function get_axle_diameter() = lookup(NemaAxleDiameter, Nema23Custom);
+function get_flat_depth() = lookup(NemaAxleFlatDepth, Nema23Custom);
 
 
 module stepper() {

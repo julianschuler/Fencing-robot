@@ -48,6 +48,7 @@ bearing_large  = [52, 40, 7]; // 6808 / 61808
 // spacer_settings
 spacer_diameter= 15;
 spacer_thickness = 0.6;
+screw_spacer_thickness = 4;
 
 // hand settings
 hand_shaft_diameter = 6;
@@ -58,12 +59,6 @@ hand_square_size = 6;
 hand_spacer_diameter = 25;
 
 // shoulder settings
-shoulder_modulus = 2;
-shoulder_teeth = 70;
-shoulder_teeth_width = 40;
-spur_pinion_teeth = 20;
-spur_wheel_teeth = 90;
-spur_teeth_width = 20;
 plate_thickness = 3;
 plate_width = 100;
 coupler_diameter = 20;
@@ -87,6 +82,13 @@ teeth_pinion=20;
 teeth_wheel=60;
 teeth_width=20;
 helix_angle=20;
+shoulder_modulus = 2;
+shoulder_teeth = 70;
+shoulder_teeth_width = 40;
+spur_pinion_teeth = 20;
+spur_wheel_teeth = 90;
+spur_teeth_width = 20;
+gear_wall_thickness = 7;
 
 // minimum distance between parts when disassembled
 part_distance = 10;
@@ -123,11 +125,13 @@ h_pos = 2;
 show_all = $preview;
 assembled = $preview ? previewAssembly : false;
 
+// screw values
 total_short_screws = 5 * bearing_holes + 2 * bracket_holes + 2 * outer_screws + inner_screws;
 total_long_screws = 3 * axle_holes;
 total_screws = total_short_screws + total_long_screws;
 screw_spacing = max(screw_head_diameter/cos(30) + part_distance, screw_head_diameter + part_distance);
 screw_clearance = max(screw_nut_diameter/(2 * cos(30)), screw_head_diameter/2);
+screw_spacer_diameter = screw_diameter + 2 * wall_thickness;
 
 // stepper values
 stepper_size = get_side_size() + 2 * pressfit_clearance;
@@ -138,6 +142,8 @@ stepper_offset = screw_length - get_plate_thickness();
 stepper_thickness = get_extrusion_thickness();
 stepper_diameter = get_extrusion_diameter();
 stepper_plate_thickness = get_plate_thickness() - get_extrusion_thickness();
+stepper_axle_diameter = get_axle_diameter();
+stepper_flat_depth = get_flat_depth();
 
 // gear values
 wheel_radius = get_wheel_radius(modulus, teeth_pinion, teeth_wheel);

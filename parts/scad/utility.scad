@@ -20,6 +20,11 @@ module special_spacer() {
 }
 
 
+module screw_spacer() {
+  color("orange") ring(screw_spacer_diameter, screw_diameter, screw_spacer_thickness);
+}
+
+
 module nutcatch_overhang(name, diameter, height, clearance=sliding_clearance) {
   difference () {
     translate([0, 0, -e]) rotate([180, 0, 0]) nutcatch_parallel(name, 
